@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lina Valencia | Alta Repostería</title>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="loading">
+
+    <div class="bg-corazones">
+        <svg class="corazon c1 dorado" viewBox="0 0 32 29.6"><path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/></svg>
+        <svg class="corazon c2 fucsia" viewBox="0 0 32 29.6"><path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/></svg>
+        <svg class="corazon c3 dorado" viewBox="0 0 32 29.6"><path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/></svg>
+        <svg class="corazon c4 fucsia" viewBox="0 0 32 29.6"><path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/></svg>
+        <svg class="corazon c5 dorado" viewBox="0 0 32 29.6"><path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/></svg>
+    </div>
+
+    <div id="loader-wrapper">
+        <div class="logo-loader">
+            <img src="logo.png" alt="Lina Valencia">
+        </div>
+    </div>
+
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="#" class="nav-item">Menú</a>
+        <a href="#" class="nav-item">Contacto</a>
+        <a href="#" class="nav-item">Pasteles</a>
+        <a href="#" class="nav-item">Galletas</a>
+    </div>
+
+    <header class="main-header glass-navbar">
+        <span class="nav-icon-open" onclick="openNav()">&#9776;</span>
+        <nav class="nav-links">
+            <a href="#" class="btn-hover hidden-mobile">Menú</a>
+            <a href="#" class="btn-hover hidden-mobile">Contacto</a>
+            
+            <a href="#" class="logo-container">
+                <img src="logo.png" alt="Lina Valencia">
+            </a>
+            
+            <a href="#" class="btn-hover hidden-mobile">Pasteles</a>
+            <a href="#" class="btn-hover hidden-mobile">Galletas</a>
+        </nav>
+    </header>
+
+    <main class="content">
+        <div id="myCarousel" class="carousel slide hero-banner" data-ride="carousel">
+            <ol class="carousel-indicators custom-dots">
+                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                <li data-target="#myCarousel" data-slide-to="1"></li>
+                <li data-target="#myCarousel" data-slide-to="2"></li>
+                <li data-target="#myCarousel" data-slide-to="3"></li>
+                <li data-target="#myCarousel" data-slide-to="4"></li>
+                <li data-target="#myCarousel" data-slide-to="5"></li>
+                <li data-target="#myCarousel" data-slide-to="6"></li>
+                <li data-target="#myCarousel" data-slide-to="7"></li>
+            </ol>
+
+            <div class="carousel-inner" role="listbox">
+                <div class="item active"><img src="banner-red-velvet.jpg.png" alt="Red Velvet"></div>
+                <div class="item"><img src="banner-cheesecake.jpg.png" alt="Cheesecake" loading="lazy"></div>
+                <div class="item"><img src="banner-postres-copa.jpg.png" alt="Postres" loading="lazy"></div>
+                <div class="item"><img src="banner-pasteles.jpg.png" alt="Pasteles" loading="lazy"></div>
+                <div class="item"><img src="banner-galletas-personalizadas.jpg.png" alt="Galletas" loading="lazy"></div>
+                <div class="item"><img src="banner-cupcakes-celebracion.jpg.png" alt="Cupcakes" loading="lazy"></div>
+                <div class="item"><img src="banner-tres-leches.jpg.png" alt="Tres Leches" loading="lazy"></div>
+                <div class="item"><img src="banner-mini-donas.jpg.png" alt="Mini Donas" loading="lazy"></div>
+            </div>
+
+            <a class="left carousel-control custom-control" href="#myCarousel" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </a>
+            <a class="right carousel-control custom-control" href="#myCarousel" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </a>
+        </div>
+
+        <section class="menu-destacados">
+            <div class="titulos-seccion">
+                <h3>NUESTROS PRODUCTOS DESTACADOS</h3>
+            </div>
+          
+            <div class="productos-grid">
+              
+                <div class="tarjeta tarjeta-destacada">
+                    <div class="imagen-contenedor">
+                        <img src="icon_personalizadas.png" alt="Torta de Boda Personalizada">
+                    </div>
+                    <div class="tarjeta-info">
+                        <button class="btn-pedir">Personalizadas</button>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_tortasartesanales.png" alt="Tortas Artesanales">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>TORTAS ARTESANALES</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_ponques.png" alt="Ponqués">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>PONQUÉS</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_minitortas.png" alt="Mini Tortas">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>MINI TORTAS</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_cupcakes.png" alt="Cupcakes">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>CUPCAKES</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_galletas.png" alt="Galletas">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>GALLETAS</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_postres.png" alt="Postres">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>POSTRES</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_desayunos.png" alt="Desayunos Sorpresa">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>DESAYUNOS</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_combos.png" alt="Combos">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>COMBOS</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_novedades.png" alt="Novedades">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>NOVEDADES</h4>
+                    </div>
+                </div>
+            
+                <div class="tarjeta">
+                    <div class="imagen-contenedor">
+                        <img src="icon_adds.png" alt="Adicionales">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h4>ADICIONALES</h4>
+                    </div>
+                </div>
+          
+            </div>
+        </section>
+
+   <section class="nuestra-esencia">
+    <div class="esencia-contenedor">
+        
+        <div class="esencia-img anim-desde-izq">
+            <img src="foto 23.png" alt="Torta Julieta Personalizada">
+        </div>
+
+        <div class="esencia-texto anim-desde-centro">
+            <h3 class="subtitulo-esencia">Nuestra Esencia</h3>
+            <h2>El arte de endulzar tus momentos</h2>
+            
+            <p><strong>Lina Valencia</strong> nace del amor por lo artesanal, por los detalles hechos a mano y por esa magia que ocurre cuando un ingrediente sencillo se transforma en algo extraordinario.</p>
+            
+            <p>Cada torta, cada cupcake y cada creación lleva consigo una historia: la de una mujer apasionada que decidió convertir su talento en experiencias que alegran la vida de los demás.</p>
+            
+            <div class="divisor-dorado">♡</div>
+        </div>
+        <div class="esencia-img anim-desde-der">
+            <img src="torta_happy.png" alt="Torta Happy Birthday">
+        </div>
+
+    </div>
+</section>
+
+<section class="clientes-satisfechos">
+    <div class="titulos-seccion anim-desde-centro">
+        <h3 class="subtitulo-esencia">¿CÓMO COMPRAR?</h3>
+        <h2>Tu pedido en 3 pasos</h2>
+    </div>
+
+    <div class="clientes-grid">
+        
+        <div class="cliente-card anim-desde-centro" style="transition-delay: 0.1s;">
+            <div class="cliente-img">
+                <img src="icon_paso1.png" alt="Paso 1: Inspírate">
+            </div>
+            <h4 class="cliente-nombre" style="margin-top: 10px; font-size: 1.4rem;">1. Inspírate</h4>
+            <p class="cliente-resena" style="margin-top: 15px;">Revisa nuestro catálogo en la web, navega por nuestras redes sociales o envíanos tu propia idea de diseño.</p>
+        </div>
+
+        <div class="cliente-card anim-desde-centro" style="transition-delay: 0.3s;">
+            <div class="cliente-img">
+                <img src="icon_paso2.png" alt="Paso 2: Cotiza y Reserva">
+            </div>
+            <h4 class="cliente-nombre" style="margin-top: 10px; font-size: 1.4rem;">2. Cotiza y Reserva</h4>
+            <p class="cliente-resena" style="margin-top: 15px;">Escríbenos para definir detalles, tamaño, sabores y agendar la fecha de entrega con anticipación.</p>
+        </div>
+
+        <div class="cliente-card anim-desde-centro" style="transition-delay: 0.5s;">
+            <div class="cliente-img">
+                <img src="icon_paso3.png" alt="Paso 3: Disfruta">
+            </div>
+            <h4 class="cliente-nombre" style="margin-top: 10px; font-size: 1.4rem;">3. Disfruta</h4>
+            <p class="cliente-resena" style="margin-top: 15px;">Recibe tu pedido en la puerta de tu casa o recógelo directamente en nuestro taller y ¡a celebrar!</p>
+        </div>
+
+    </div>
+</section>
+
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="inicio.js"></script>
+</body>
+</html>
