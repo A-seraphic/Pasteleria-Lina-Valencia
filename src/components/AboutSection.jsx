@@ -1,12 +1,10 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const EASE = [0.22, 1, 0.36, 1];
 
-const ABOUT_IMG_DESKTOP = "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/b23739b26_WhatsAppImage2026-09-10at65525PM.jpeg";
-const ABOUT_IMG_MOBILE = "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/45544a097_ChatGPTImage10sept202610_09_38pm.png";
+const ABOUT_IMG_DESKTOP = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/b23739b26_WhatsAppImage2026-09-10at65525PM.jpeg";
+const ABOUT_IMG_MOBILE = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/45544a097_ChatGPTImage10sept202610_09_38pm.png";
 
 export default function AboutSection() {
   const sectionRef = useRef(null);

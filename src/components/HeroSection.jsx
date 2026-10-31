@@ -1,8 +1,6 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { motion } from "framer-motion";
 
-const HERO_IMG = "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/b8c1349ab_generated_82178631.png";
+const HERO_IMG = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/b8c1349ab_generated_82178631.png";
 
 export default function HeroSection() {
   return (

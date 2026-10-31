@@ -1,5 +1,3 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,7 +9,7 @@ const FALLBACK = "https://images.unsplash.com/photo-1562440499-64c9a111f713?w=16
 
 // We use a hosted royalty-free video of a pastry kitchen / elegant food
 // Pixabay / Pexels MP4 direct links work well here
-const VIDEO_SRC = "https://media.db.com/videos/public/69f9758f7d1c8f8af9a6884c/e34a700fe_Lneadetiempo3.mp4";
+const VIDEO_SRC = "https://media.base44.com/videos/public/69f9758f7d1c8f8af9a6884c/e34a700fe_Lneadetiempo3.mp4";
 
 export default function VideoRevealSection() {
   const sectionRef = useRef(null);

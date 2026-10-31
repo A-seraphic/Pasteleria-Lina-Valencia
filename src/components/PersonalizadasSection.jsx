@@ -1,5 +1,3 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,16 +6,16 @@ import { Draggable } from "gsap/Draggable";
 gsap.registerPlugin(ScrollTrigger, Draggable);
 
 const CARDS = [
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/b087a2735_ChatGPTImage28jun202605_47_52pm.png", label: "Feliz 90 Años" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/27bbac698_ChatGPTImage28jun202605_48_45pm.png", label: "Dani · Mariposas" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/243a59231_ChatGPTImage28jun202605_48_56pm.png", label: "Mis 15" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/abd51d06c_ChatGPTImage28jun202605_49_05pm.png", label: "Samuel 12 · Fútbol" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/50e1a3a21_ChatGPTImage28jun202605_49_20pm.png", label: "Powerpuff Girls" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/e445ddd13_ChatGPTImage28jun202605_49_31pm.png", label: "Graduación Medicina" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/a973fcbbd_ChatGPTImage28jun202605_49_39pm.png", label: "Paw Patrol" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/c814b2678_ChatGPTImage28jun202605_49_46pm.png", label: "Naked Cake Floral" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/6fffd31a0_ChatGPTImage28jun202605_49_53pm.png", label: "San Pedro Huila" },
-  { img: "https://media.db.com/images/public/69f9758f7d1c8f8af9a6884c/78c2f2fd8_ChatGPTImage28jun202605_50_05pm.png", label: "Happy Birthday Art" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/b087a2735_ChatGPTImage28jun202605_47_52pm.png", label: "Feliz 90 Años" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/27bbac698_ChatGPTImage28jun202605_48_45pm.png", label: "Dani · Mariposas" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/243a59231_ChatGPTImage28jun202605_48_56pm.png", label: "Mis 15" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/abd51d06c_ChatGPTImage28jun202605_49_05pm.png", label: "Samuel 12 · Fútbol" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/50e1a3a21_ChatGPTImage28jun202605_49_20pm.png", label: "Powerpuff Girls" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/e445ddd13_ChatGPTImage28jun202605_49_31pm.png", label: "Graduación Medicina" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/a973fcbbd_ChatGPTImage28jun202605_49_39pm.png", label: "Paw Patrol" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/c814b2678_ChatGPTImage28jun202605_49_46pm.png", label: "Naked Cake Floral" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/6fffd31a0_ChatGPTImage28jun202605_49_53pm.png", label: "San Pedro Huila" },
+  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/78c2f2fd8_ChatGPTImage28jun202605_50_05pm.png", label: "Happy Birthday Art" },
 ];
 
 const RADIUS = 480;

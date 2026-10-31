@@ -1,10 +1,8 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 **Welcome to your Base44 project** 
 
 **About**
 
-View and Edit  your app on [db.com](http://db.com) 
+View and Edit  your app on [base44.com](http://base44.com) 
 
 This project contains everything you need to run your app locally.
 
@@ -32,10 +30,10 @@ Run the app: `npm run dev`
 
 **Publish your changes**
 
-Open [db.com](http://db.com) and click on Publish.
+Open [base44.com](http://base44.com) and click on Publish.
 
 **Docs & Support**
 
-Documentation: [https://docs.db.com/Integrations/Using-GitHub](https://docs.db.com/Integrations/Using-GitHub)
+Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
 
-Support: [https://app.db.com/support](https://app.db.com/support)
+Support: [https://app.base44.com/support](https://app.base44.com/support)
