@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Sparkles, Leaf } from "lucide-react";
+import { ArrowLeft, Sparkles, Camera } from "lucide-react";
+import CakeARModal from "./cake/CakeARModal";
+import useScrollLock from "@/hooks/useScrollLock";
+import { usePublicCatalog, productOptions } from "@/data/catalogStore";
+import { OPTION_KINDS } from "@/data/defaults";
 import OrderForm from "./OrderForm";
 import DessertCareModal from "./DessertCareModal";
 
@@ -67,6 +71,9 @@ export default function SubcatalogView({ product, productIdx, onBack, initialSub
   const [direction, setDirection] = useState(1);
   const [orderFormOpen, setOrderFormOpen] = useState(false);
   const [careOpen, setCareOpen] = useState(false);
+  const [arOpen, setArOpen] = useState(false);
+  const { options, portions } = usePublicCatalog();
+  useScrollLock(true);
 
   const scrollRef  = useRef(null); // right panel
   const imageRef   = useRef(null); // left panel — also intercepts wheel/touch
@@ -74,7 +81,9 @@ export default function SubcatalogView({ product, productIdx, onBack, initialSub
 
   const palette = PALETTES[productIdx % PALETTES.length] || PALETTES[0];
   const deco = DECO_SHAPES[productIdx % DECO_SHAPES.length] || [];
-  const sub = product.subcategories[subIdx];
+  const sub = product.subcategories[subIdx] || product.subcategories[0];
+  const subOptions = productOptions(sub, options);
+  const subPortions = portions.filter((p) => sub?.portionIds?.includes(p.id));
 
   const goTo = (idx) => {
     if (idx === subIdx || idx < 0 || idx >= product.subcategories.length) return;
@@ -147,7 +156,8 @@ export default function SubcatalogView({ product, productIdx, onBack, initialSub
   return (
     <>
       <motion.div
-        className="fixed inset-0 z-30 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden font-inter"
+        data-scroll-lock
+        className="fixed inset-0 z-30 flex flex-col md:flex-row overflow-y-auto overscroll-contain md:overflow-hidden font-inter"
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.97 }}
@@ -310,6 +320,25 @@ export default function SubcatalogView({ product, productIdx, onBack, initialSub
                   ))}
                 </div>
 
+                {/* Opciones que eligieron los dueños para este producto */}
+                {Object.keys(subOptions).length > 0 && (
+                  <div className="mb-7 space-y-3">
+                    {OPTION_KINDS.filter((k) => subOptions[k.kind]).map((k) => (
+                      <div key={k.kind}>
+                        <p className="font-inter text-[10px] tracking-[0.18em] uppercase mb-1.5" style={{ color: "#d4af37" }}>{k.label}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {subOptions[k.kind].map((o) => (
+                            <span key={o.id} className="px-2.5 py-1 rounded-full font-inter text-[11px]"
+                              style={{ background: "rgba(165,0,89,0.05)", color: "rgba(165,0,89,0.75)", border: "1px solid rgba(165,0,89,0.08)" }}>
+                              {o.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* Price + CTAs */}
                 <div className="flex items-center gap-4 flex-wrap">
                   <div>
@@ -325,6 +354,17 @@ export default function SubcatalogView({ product, productIdx, onBack, initialSub
                     Personalizar
                   </button>
                 </div>
+
+                {sub.ar && subPortions.length > 0 && (
+                  <button
+                    onClick={() => setArOpen(true)}
+                    className="ar-cta mt-5 w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3.5 rounded-full font-inter text-xs font-semibold tracking-[0.12em] uppercase active:scale-[0.98] transition-transform"
+                    style={{ background: "rgba(212,175,55,0.12)", color: "#a50059", border: "1px solid rgba(212,175,55,0.35)" }}
+                  >
+                    <Camera size={15} />
+                    Ver tamaño real con la cámara
+                  </button>
+                )}
 
                 {/* Dessert care toggle — subtle label */}
                 <button
@@ -367,8 +407,13 @@ export default function SubcatalogView({ product, productIdx, onBack, initialSub
 
       {/* Modals */}
       {orderFormOpen && (
-        <OrderForm product={product} subcategory={sub} onClose={() => setOrderFormOpen(false)} />
+        <OrderForm product={product} subcategory={sub} options={subOptions} portions={subPortions} onClose={() => setOrderFormOpen(false)} />
       )}
+      <AnimatePresence>
+        {arOpen && (
+          <CakeARModal portions={subPortions} title={sub.name} onClose={() => setArOpen(false)} />
+        )}
+      </AnimatePresence>
       {careOpen && (
         <DessertCareModal product={product} onClose={() => setCareOpen(false)} />
       )}

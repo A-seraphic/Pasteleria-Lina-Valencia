@@ -1,20 +1,13 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageCircle, Download, Loader2 } from "lucide-react";
+import { X, Download, Loader2 } from "lucide-react";
 import ReceiptTemplate from "./ReceiptTemplate";
+import { OPTION_KINDS } from "@/data/defaults";
+import useScrollLock from "@/hooks/useScrollLock";
 
 const EASE = [0.22, 1, 0.36, 1];
 
-const BIZCOCHO_FLAVORS = [
-  "Vainilla de Madagascar",
-  "Chocolate negro 72%",
-  "Red Velvet",
-  "Limón Siciliano",
-  "Almendra & Amaretto",
-  "Café colombiano",
-  "Coco & Maracuyá",
-  "Sin sabor específico / Consultar",
-];
+const WHATSAPP = "573001234567";
 
 const inputStyle = {
   background: "rgba(253,250,245,0.7)",
@@ -30,10 +23,15 @@ function generateOrderCode() {
   return `#LV-${year}-${num}`;
 }
 
-export default function OrderForm({ product, subcategory, onClose }) {
+export default function OrderForm({ product, subcategory, options = {}, portions = [], onClose }) {
+  useScrollLock(true);
   const [porciones,  setPorciones]  = useState("");
   const [sabor,      setSabor]      = useState(subcategory?.name || "");
-  const [bizcocho,   setBizcocho]   = useState(BIZCOCHO_FLAVORS[0]);
+  // Una opción por tipo (bizcocho, relleno, cobertura); los adicionales pueden ser varios
+  const [picks,      setPicks]      = useState(() =>
+    Object.fromEntries(Object.entries(options).filter(([k]) => k !== "extra").map(([k, list]) => [k, list[0]?.name || ""]))
+  );
+  const [extras,     setExtras]     = useState([]);
   const [fecha,      setFecha]      = useState("");
   const [detalles,   setDetalles]   = useState("");
 
@@ -41,7 +39,11 @@ export default function OrderForm({ product, subcategory, onClose }) {
   const [receiptImg, setReceiptImg] = useState(null);
   const orderCode = useRef(generateOrderCode());
 
-  const receiptData = { product, subcategory, sabor, bizcocho, porciones, fecha, detalles, orderCode: orderCode.current };
+  const choices = [
+    ...OPTION_KINDS.filter((k) => picks[k.kind]).map((k) => ({ label: k.short, value: picks[k.kind] })),
+    ...(extras.length ? [{ label: "Adicionales", value: extras.join(", ") }] : []),
+  ];
+  const receiptData = { product, subcategory, sabor, choices, porciones, fecha, detalles, orderCode: orderCode.current };
 
   // ── Generate receipt image ────────────────────────────────────────────────
   const handleConfirm = async () => {
@@ -77,7 +79,7 @@ export default function OrderForm({ product, subcategory, onClose }) {
       ``,
       `*Pedido ${orderCode.current}*`,
       `📦 Producto: ${product.name} — ${sabor || subcategory?.name}`,
-      `🍰 Bizcocho: ${bizcocho}`,
+      ...choices.map((c) => `🍰 ${c.label}: ${c.value}`),
       `👥 Porciones: ${porciones || "No especificado"}`,
       `📅 Evento: ${fecha || "No especificada"}`,
       `✏️ Notas: ${detalles || "Sin notas"}`,
@@ -85,7 +87,7 @@ export default function OrderForm({ product, subcategory, onClose }) {
       ``,
       `_(Adjunto la imagen del recibo desde mi galería)_`,
     ];
-    const waUrl = `https://wa.me/573001234567?text=${encodeURIComponent(lines.join("\n"))}`;
+    const waUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
     setTimeout(() => window.open(waUrl, "_blank"), 400);
   };
 
@@ -96,13 +98,14 @@ export default function OrderForm({ product, subcategory, onClose }) {
 
       <AnimatePresence>
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          data-scroll-lock
+          className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain"
           style={{ background: "rgba(165,0,89,0.08)", backdropFilter: "blur(8px)" }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="relative w-full max-w-md rounded-3xl p-8 my-4"
+            className="relative w-full max-w-md rounded-3xl p-6 sm:p-8 my-4"
             style={{
               background: "rgba(253,250,245,0.92)",
               backdropFilter: "blur(28px)",
@@ -143,33 +146,65 @@ export default function OrderForm({ product, subcategory, onClose }) {
                 <div className="space-y-4">
                   <Field label="Variedad / Sabor del postre">
                     <select value={sabor} onChange={(e) => setSabor(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-sm outline-none appearance-none" style={inputStyle}>
+                      className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none appearance-none" style={inputStyle}>
                       {product.subcategories.map((s) => (
                         <option key={s.name} value={s.name}>{s.name}</option>
                       ))}
                     </select>
                   </Field>
 
-                  <Field label="Sabor de bizcocho">
-                    <select value={bizcocho} onChange={(e) => setBizcocho(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-sm outline-none appearance-none" style={inputStyle}>
-                      {BIZCOCHO_FLAVORS.map((f) => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </select>
-                  </Field>
+                  {OPTION_KINDS.filter((k) => k.kind !== "extra" && options[k.kind]).map((k) => (
+                    <Field key={k.kind} label={k.short}>
+                      <select value={picks[k.kind]} onChange={(e) => setPicks((p) => ({ ...p, [k.kind]: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none appearance-none" style={inputStyle}>
+                        {options[k.kind].map((o) => (
+                          <option key={o.id} value={o.name}>{o.name}</option>
+                        ))}
+                        <option value="Por definir">Por definir / Consultar</option>
+                      </select>
+                    </Field>
+                  ))}
 
-                  <Field label="Cantidad de porciones">
-                    <input type="number" min="1" placeholder="Ej: 12"
-                      value={porciones} onChange={(e) => setPorciones(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-sm outline-none" style={inputStyle}
-                      onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                      onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
+                  {options.extra && (
+                    <Field label="Adicionales">
+                      <div className="flex flex-wrap gap-2">
+                        {options.extra.map((o) => {
+                          const on = extras.includes(o.name);
+                          return (
+                            <button key={o.id} type="button"
+                              onClick={() => setExtras((x) => (on ? x.filter((n) => n !== o.name) : [...x, o.name]))}
+                              className="px-3 py-2 rounded-full font-inter text-xs transition-colors"
+                              style={{ background: on ? "#a50059" : "rgba(253,250,245,0.7)", color: on ? "#fdfaf5" : "#a50059", border: "1px solid rgba(212,175,55,0.25)" }}>
+                              {on ? "✓ " : "+ "}{o.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </Field>
+                  )}
+
+                  <Field label={portions.length ? "Tamaño" : "Cantidad de porciones"}>
+                    {portions.length ? (
+                      <select value={porciones} onChange={(e) => setPorciones(e.target.value)}
+                        className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none appearance-none" style={inputStyle}>
+                        <option value="">Elige un tamaño</option>
+                        {portions.map((p) => {
+                          const text = `${p.label} · Ø ${p.diameter} cm · ${p.people}`;
+                          return <option key={p.id} value={text}>{text}</option>;
+                        })}
+                      </select>
+                    ) : (
+                      <input type="number" min="1" placeholder="Ej: 12"
+                        value={porciones} onChange={(e) => setPorciones(e.target.value)}
+                        className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none" style={inputStyle}
+                        onFocus={(e) => (e.target.style.borderColor = focusBorder)}
+                        onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
+                    )}
                   </Field>
 
                   <Field label="Fecha del evento">
                     <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-sm outline-none"
+                      className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none"
                       style={{ ...inputStyle, colorScheme: "light" }}
                       onFocus={(e) => (e.target.style.borderColor = focusBorder)}
                       onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
@@ -178,7 +213,7 @@ export default function OrderForm({ product, subcategory, onClose }) {
                   <Field label="Descripción / Cambios especiales">
                     <textarea rows={3} placeholder="Ej: Sin gluten, mensaje personalizado, color específico..."
                       value={detalles} onChange={(e) => setDetalles(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-sm outline-none resize-none" style={inputStyle}
+                      className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none resize-none" style={inputStyle}
                       onFocus={(e) => (e.target.style.borderColor = focusBorder)}
                       onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
                   </Field>

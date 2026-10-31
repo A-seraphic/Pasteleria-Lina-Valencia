@@ -3,7 +3,7 @@
  * Must be mounted in the DOM but positioned out of view.
  */
 export default function ReceiptTemplate({ id, data }) {
-  const { product, subcategory, sabor, bizcocho, porciones, fecha, detalles, orderCode } = data;
+  const { product, subcategory, sabor, choices = [], porciones, fecha, detalles, orderCode } = data;
 
   return (
     <div
@@ -59,7 +59,7 @@ export default function ReceiptTemplate({ id, data }) {
         {[
           { label: "Producto", value: product.name },
           { label: "Variedad / Diseño", value: sabor || subcategory?.name },
-          { label: "Sabor de bizcocho", value: bizcocho },
+          ...choices,
           { label: "Porciones", value: porciones || "No especificado" },
           { label: "Fecha del evento", value: fecha || "No especificada" },
           { label: "Notas especiales", value: detalles || "Sin notas adicionales" },

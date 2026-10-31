@@ -4,9 +4,10 @@ import SlideRevealWrapper from "./SlideRevealWrapper";
 import SubcatalogView from "./SubcatalogView";
 import CategoryGallery from "./CategoryGallery";
 import CatalogCard from "./CatalogCard";
-import { CATALOG } from "../data/catalogData";
+import { usePublicCatalog } from "@/data/catalogStore";
 
 export default function CatalogSection() {
+  const { categories } = usePublicCatalog();
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [openProduct, setOpenProduct] = useState(null); // gallery state
   const [detail, setDetail] = useState(null); // book detail state
@@ -49,7 +50,7 @@ export default function CatalogSection() {
           `}</style>
           <div id="catalog-grid">
 
-            {CATALOG.map((product, i) => (
+            {categories.map((product, i) => (
               <SlideRevealWrapper key={product.id} direction="up" delay={i * 0.055}>
                 <CatalogCard
                   product={product}

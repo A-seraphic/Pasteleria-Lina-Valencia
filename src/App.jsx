@@ -7,6 +7,10 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Home from './pages/Home';
 import CatalogDetail from './pages/CatalogDetail';
+import { lazy, Suspense } from 'react';
+
+// El panel de dueños se carga aparte: los clientes nunca descargan su código
+const Panel = lazy(() => import('./pages/Panel'));
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -37,6 +41,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/catalogo" element={<CatalogDetail />} />
+      <Route path="/panel" element={<Suspense fallback={null}><Panel /></Suspense>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

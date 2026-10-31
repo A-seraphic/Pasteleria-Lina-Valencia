@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, Box } from "lucide-react";
+import useScrollLock from "@/hooks/useScrollLock";
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -8,9 +9,11 @@ const EASE = [0.22, 1, 0.36, 1];
  * Clicking a card opens the book-style detail view on that product.
  */
 export default function CategoryGallery({ product, productIdx, onSelect, onBack }) {
+  useScrollLock(true);
   return (
     <motion.div
-      className="fixed inset-0 z-30 overflow-y-auto font-inter"
+      data-scroll-lock
+      className="fixed inset-0 z-30 overflow-y-auto overscroll-contain font-inter"
       style={{ background: "#fdfaf5" }}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -26,6 +29,7 @@ export default function CategoryGallery({ product, productIdx, onSelect, onBack 
         .gallery-card:hover .gallery-img { transform: scale(1.08); }
         .gallery-img { transition: transform 0.7s cubic-bezier(0.22,1,0.36,1); }
         .gallery-card:hover .gallery-cta { opacity: 1; transform: translateY(0); }
+        @media (hover: none) { .gallery-card .gallery-cta { opacity: 1 !important; transform: none !important; } .gallery-card:hover { transform: none; } }
       `}</style>
 
       {/* Back button */}
@@ -65,7 +69,7 @@ export default function CategoryGallery({ product, productIdx, onSelect, onBack 
         <div className="gallery-grid">
           {product.subcategories.map((sub, i) => (
             <motion.div
-              key={`${product.id}-${i}`}
+              key={sub.id ?? `${product.id}-${i}`}
               className="gallery-card relative rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer"
               style={{
                 background: "rgba(253,250,245,0.7)",
@@ -91,8 +95,15 @@ export default function CategoryGallery({ product, productIdx, onSelect, onBack 
                   className="absolute top-3 left-3 px-2.5 py-1 rounded-full font-inter text-[9px] font-semibold tracking-[0.16em] uppercase"
                   style={{ background: "rgba(253,250,245,0.88)", backdropFilter: "blur(10px)", color: "#d4af37" }}
                 >
-                  {i + 1}
+                  {sub.badge || i + 1}
                 </div>
+                {sub.ar && (
+                  <div className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center"
+                    title="Disponible en 3D"
+                    style={{ background: "rgba(165,0,89,0.85)", color: "#fdfaf5", backdropFilter: "blur(8px)" }}>
+                    <Box size={13} />
+                  </div>
+                )}
               </div>
 
               {/* Body */}

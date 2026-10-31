@@ -98,3 +98,28 @@
 *::-webkit-scrollbar {
   display: none;
 }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+html { -webkit-tap-highlight-color: transparent; }
+
+/* Brillo que recorre los botones de cámara / AR */
+.ar-cta { overflow: hidden; isolation: isolate; }
+.ar-cta:not(.absolute) { position: relative; }
+.ar-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: ar-shine 3.2s ease-in-out infinite;
+  z-index: -1;
+}
+@keyframes ar-shine {
+  0%, 55% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-cta::after { animation: none; }
+}

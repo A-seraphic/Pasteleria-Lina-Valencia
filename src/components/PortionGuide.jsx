@@ -1,416 +1,303 @@
-import { useRef, useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import { Camera, Ruler, Weight, Layers } from "lucide-react";
+import CakeViewer from "./cake/CakeViewer";
+import CakeARModal from "./cake/CakeARModal";
+import SlideRevealWrapper from "./SlideRevealWrapper";
+import { usePublicCatalog } from "@/data/catalogStore";
+import { estimateWeightKg } from "@/lib/cakeSpecs";
 
 const EASE = [0.22, 1, 0.36, 1];
 
-const PORTIONS = [
-  { label: "Individual",   value: "1–2 personas",   size: "10 cm",     slices: 2  },
-  { label: "Para dos",     value: "2–4 personas",    size: "15 cm",     slices: 4  },
-  { label: "Pequeño",      value: "6–8 personas",    size: "18 cm",     slices: 8  },
-  { label: "Familiar",     value: "10–12 personas",  size: "24 cm",     slices: 12 },
-  { label: "Celebración",  value: "20–25 personas",  size: "30 cm",     slices: 20 },
-  { label: "Gran Evento",  value: "+40 personas",    size: "Consultar", slices: 40 },
+const CUTS = [
+  { key: "generoso", label: "Generoso", factor: 0.75, note: "Porciones grandes, ideales para golosos y postre principal." },
+  { key: "estandar", label: "Estándar", factor: 1, note: "El corte que recomendamos: buena porción y la torta se mantiene firme." },
+  { key: "fino", label: "Fino", factor: 1.3, note: "Rinde más para eventos grandes. Cortes delgados, con cuchillo caliente." },
 ];
 
-// ── Animated Isometric Cake SVG ────────────────────────────────────────────────
-function IsoCake({ slices }) {
-  const CX = 110, CY = 80, RX = 88, RY = 44, H = 32;
-  const drawn = Math.min(slices, 32);
-
-  // We use a ref-based angle store to animate lines with GSAP
-  const linesRef = useRef([]);
-  const prevSlicesRef = useRef(drawn);
-
-  // Animate line angles when slices change
+// Número que cuenta suavemente al cambiar
+function CountUp({ value }) {
+  const [shown, setShown] = useState(value);
+  const from = useRef(value);
   useEffect(() => {
-    const prev = prevSlicesRef.current;
-    if (prev === drawn) return;
-    prevSlicesRef.current = drawn;
+    const start = performance.now();
+    const a = from.current;
+    let raf;
+    const tick = (t) => {
+      const k = Math.min(1, (t - start) / 450);
+      const v = Math.round(a + (value - a) * (1 - Math.pow(1 - k, 3)));
+      setShown(v);
+      if (k < 1) raf = requestAnimationFrame(tick);
+      else from.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{shown}</>;
+}
 
-    linesRef.current.forEach((el, i) => {
-      if (!el) return;
-      const targetAngle = (360 / drawn) * i - 90;
-      gsap.to(el, {
-        attr: { transform: `rotate(${targetAngle}, ${CX}, ${CY})` },
-        duration: 0.55,
-        ease: "power2.out",
-      });
-    });
-  }, [drawn]);
-
-  const slicePaths = [];
-  for (let i = 0; i < drawn; i++) {
-    const a0 = (2 * Math.PI * i) / drawn - Math.PI / 2;
-    const a1 = (2 * Math.PI * (i + 1)) / drawn - Math.PI / 2;
-    const isFirst = i === 0;
-    const lift = isFirst ? 7 : 0;
-    const midA = (a0 + a1) / 2;
-    const lx = Math.cos(midA) * lift * 0.5;
-    const ly = Math.sin(midA) * lift * 0.28;
-    const x0 = CX + lx, y0 = CY - ly;
-    const x1 = CX + RX * Math.cos(a0) + lx, y1 = CY + RY * Math.sin(a0) - ly;
-    const x2 = CX + RX * Math.cos(a1) + lx, y2 = CY + RY * Math.sin(a1) - ly;
-
-    slicePaths.push(
-      <g key={i} style={{ transition: "all 0.5s cubic-bezier(0.22,1,0.36,1)" }}>
-        {isFirst && (
-          <path
-            d={`M ${x1} ${y1} L ${x1} ${y1 + H} L ${x0} ${y0 + H} L ${x0} ${y0} Z`}
-            fill="#e8b9cc" stroke="#d4af37" strokeWidth="0.7" opacity="0.7"
-          />
-        )}
-        <path
-          d={`M ${x0} ${y0} L ${x1} ${y1} A ${RX} ${RY} 0 0 1 ${x2} ${y2} Z`}
-          fill={isFirst ? "rgba(253,240,245,0.92)" : "#fdf0f5"}
-          stroke="#a50059"
-          strokeWidth={isFirst ? "1.2" : "0.6"}
-          strokeOpacity={isFirst ? 0.5 : 0.25}
-          style={{ transition: "all 0.55s cubic-bezier(0.22,1,0.36,1)" }}
-        />
-        {/* Cut line from center — used by GSAP for angle animation */}
-        <line
-          ref={(el) => (linesRef.current[i] = el)}
-          x1={CX} y1={CY}
-          x2={CX + RX * Math.cos(a0)} y2={CY + RY * Math.sin(a0)}
-          stroke="rgba(165,0,89,0.18)" strokeWidth="0.7" strokeDasharray="3 3"
-          style={{ transition: "all 0.55s cubic-bezier(0.22,1,0.36,1)" }}
-        />
-      </g>
-    );
-  }
-
+// Círculos concéntricos a escala para comparar diámetros
+function SizeRings({ portions, activeId, onSelect }) {
+  const max = Math.max(...portions.map((p) => p.diameter));
+  const sorted = [...portions].sort((a, b) => b.diameter - a.diameter);
   return (
-    <svg viewBox="0 0 220 160" width="100%" height="100%" style={{ overflow: "visible" }}>
+    <svg viewBox="0 0 200 200" className="w-full h-full" role="img" aria-label="Comparación de diámetros">
       <defs>
-        <clipPath id="cake-side-clip">
-          <rect x="0" y={CY} width="220" height={H + RY + 10} />
-        </clipPath>
+        <radialGradient id="ring-fill" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#fff3f8" />
+          <stop offset="100%" stopColor="#f3c6d8" />
+        </radialGradient>
       </defs>
-      <ellipse cx={CX} cy={CY + H} rx={RX} ry={RY} fill="#f0d8e4" stroke="#d4af37" strokeWidth="1.2" clipPath="url(#cake-side-clip)" />
-      <path d={`M ${CX - RX} ${CY} L ${CX - RX} ${CY + H} A ${RX} ${RY} 0 0 0 ${CX + RX} ${CY + H} L ${CX + RX} ${CY} A ${RX} ${RY} 0 0 1 ${CX - RX} ${CY} Z`}
-        fill="#f5e0ec" stroke="#d4af37" strokeWidth="1" opacity="0.8" />
-      <path d={`M ${CX - RX} ${CY + 6} A ${RX} ${RY} 0 0 0 ${CX + RX} ${CY + 6}`}
-        fill="none" stroke="rgba(253,250,245,0.6)" strokeWidth="5" />
-      <g>{slicePaths}</g>
-      <ellipse cx={CX} cy={CY} rx={RX} ry={RY} fill="none" stroke="#d4af37" strokeWidth="1.4" />
-      <circle cx={CX} cy={CY} r="3" fill="#d4af37" opacity="0.5" />
-      {[30, 90, 150, 210, 270, 330].map((deg) => {
-        const rad = (deg * Math.PI) / 180;
-        return <circle key={deg} cx={CX + RX * 0.45 * Math.cos(rad)} cy={CY + RY * 0.45 * Math.sin(rad)} r="2.5" fill="#d4af37" opacity="0.4" />;
+      {sorted.map((p) => {
+        const r = (p.diameter / max) * 92;
+        const active = p.id === activeId;
+        return (
+          <g key={p.id} onClick={() => onSelect(p.id)} style={{ cursor: "pointer" }}>
+            <motion.circle
+              cx="100" cy="100" r={r}
+              fill={active ? "url(#ring-fill)" : "rgba(253,250,245,0.35)"}
+              stroke={active ? "#a50059" : "rgba(212,175,55,0.45)"}
+              strokeWidth={active ? 1.6 : 0.8}
+              strokeDasharray={active ? "0" : "3 3"}
+              initial={false}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, ease: EASE }}
+            />
+          </g>
+        );
       })}
+      <circle cx="100" cy="100" r="2.5" fill="#d4af37" />
     </svg>
   );
 }
 
-// ── Slice Stepper ──────────────────────────────────────────────────────────────
-function SliceStepper({ base, customSlices, onChange }) {
-  const min = Math.max(1, base - 5);
-  const max = base + 5;
-  const atMin = customSlices <= min;
-  const atMax = customSlices >= max;
-  const isIdeal = customSlices === base;
-  const isMin = customSlices === min;
-  const isMaxW = customSlices === max;
-
-  const feedback = isMaxW
-    ? { text: "⚠️ Cuidado: Rebanadas muy finas, el pastel podría perder estructura al cortarlo.", color: "#8a004c" }
-    : isMin
-    ? { text: "Rebanadas gruesas (Ideales para golosos)", color: "#d4af37" }
-    : { text: "Corte estándar recomendado", color: "rgba(165,0,89,0.45)" };
-
-  const counterRef = useRef(null);
-
-  const step = (delta) => {
-    const next = Math.min(max, Math.max(min, customSlices + delta));
-    if (next === customSlices) return;
-    // Micro-bounce on the number
-    if (counterRef.current) {
-      gsap.fromTo(counterRef.current,
-        { scale: delta > 0 ? 1.22 : 0.82, y: delta > 0 ? -6 : 6 },
-        { scale: 1, y: 0, duration: 0.38, ease: "back.out(2)" }
-      );
-    }
-    onChange(next);
-  };
-
+// Una persona por porción (hasta 60 visibles)
+function PeopleGrid({ count }) {
+  const shown = Math.min(count, 60);
   return (
-    <div className="flex flex-col items-center gap-3 w-full pt-2">
-      {/* Divider */}
-      <div className="w-full h-[1px]" style={{ background: "linear-gradient(to right, transparent, rgba(212,175,55,0.3), transparent)" }} />
-
-      {/* Counter + stepper */}
-      <div className="flex items-center gap-5">
-        {/* − button */}
-        <button
-          onClick={() => step(-1)}
-          disabled={atMin}
-          className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300"
-          style={{
-            background: atMin ? "rgba(212,175,55,0.05)" : "rgba(212,175,55,0.12)",
-            border: "1px solid rgba(212,175,55,0.3)",
-            color: atMin ? "rgba(212,175,55,0.25)" : "#d4af37",
-            cursor: atMin ? "not-allowed" : "pointer",
-            boxShadow: atMin ? "none" : "0 2px 10px rgba(212,175,55,0.12)",
-          }}
-          onMouseEnter={(e) => { if (!atMin) e.currentTarget.style.transform = "scale(1.12)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-        </button>
-
-        {/* Number display */}
-        <div className="flex flex-col items-center" style={{ minWidth: 80 }}>
-          <span
-            ref={counterRef}
-            className="font-playfair font-semibold leading-none inline-block"
-            style={{ fontSize: 42, color: "#a50059", willChange: "transform" }}
+    <div className="flex flex-wrap gap-[5px]" aria-label={`${count} porciones`}>
+      <AnimatePresence initial={false}>
+        {Array.from({ length: shown }, (_, i) => (
+          <motion.span
+            key={i}
+            className="block"
+            initial={{ opacity: 0, scale: 0.3, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.3 }}
+            transition={{ duration: 0.35, ease: EASE, delay: Math.min(i * 0.012, 0.4) }}
           >
-            {customSlices}
-          </span>
-          <span className="font-inter text-[10px] tracking-[0.18em] uppercase mt-0.5" style={{ color: "rgba(165,0,89,0.4)" }}>
-            Porciones
-          </span>
-        </div>
-
-        {/* + button */}
-        <button
-          onClick={() => step(1)}
-          disabled={atMax}
-          className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300"
-          style={{
-            background: atMax ? "rgba(212,175,55,0.05)" : "linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.1))",
-            border: "1px solid rgba(212,175,55,0.3)",
-            color: atMax ? "rgba(212,175,55,0.25)" : "#d4af37",
-            cursor: atMax ? "not-allowed" : "pointer",
-            boxShadow: atMax ? "none" : "0 2px 10px rgba(212,175,55,0.15)",
-          }}
-          onMouseEnter={(e) => { if (!atMax) e.currentTarget.style.transform = "scale(1.12)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="2" x2="7" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-        </button>
-      </div>
-
-      {/* Range indicator bar */}
-      <div className="flex items-center gap-2 w-full max-w-[200px]">
-        <span className="font-inter text-[9px]" style={{ color: "rgba(212,175,55,0.4)" }}>{min}</span>
-        <div className="flex-1 h-1.5 rounded-full relative overflow-hidden" style={{ background: "rgba(212,175,55,0.12)" }}>
-          <motion.div
-            className="absolute left-0 top-0 h-full rounded-full"
-            style={{ background: "linear-gradient(to right, #d4af37, #c49b2f)" }}
-            animate={{ width: `${((customSlices - min) / (max - min)) * 100}%` }}
-            transition={{ duration: 0.4, ease: EASE }}
-          />
-        </div>
-        <span className="font-inter text-[9px]" style={{ color: "rgba(212,175,55,0.4)" }}>{max}</span>
-      </div>
-
-      {/* Feedback message */}
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={feedback.text}
-          className="font-inter text-[10px] text-center leading-relaxed max-w-[220px]"
-          style={{ color: feedback.color }}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.28, ease: EASE }}
-        >
-          {feedback.text}
-        </motion.p>
+            <svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true">
+              <circle cx="7" cy="4.5" r="3.6" fill={i % 2 ? "#d4af37" : "#a50059"} opacity="0.85" />
+              <path d="M1 18c0-4 2.7-7 6-7s6 3 6 7z" fill={i % 2 ? "#d4af37" : "#a50059"} opacity="0.55" />
+            </svg>
+          </motion.span>
+        ))}
       </AnimatePresence>
+      {count > shown && <span className="text-[11px] self-end font-semibold" style={{ color: "#a50059" }}>+{count - shown}</span>}
     </div>
   );
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-const ICONS = [
-  <svg key="i" viewBox="0 0 40 40" fill="none" width="26" height="26"><circle cx="20" cy="14" r="6" stroke="#d4af37" strokeWidth="1.5"/><path d="M8 34c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round"/></svg>,
-  <svg key="d" viewBox="0 0 40 40" fill="none" width="26" height="26"><circle cx="14" cy="14" r="5" stroke="#d4af37" strokeWidth="1.5"/><circle cx="26" cy="14" r="5" stroke="#d4af37" strokeWidth="1.5"/><path d="M4 34c0-5.523 4.477-10 10-10M22 34c0-5.523 4.477-10 10-10" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round"/></svg>,
-  <svg key="p" viewBox="0 0 40 40" fill="none" width="26" height="26"><rect x="6" y="22" width="28" height="10" rx="3" stroke="#d4af37" strokeWidth="1.5"/><path d="M10 22v-4a10 10 0 0 1 20 0v4" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round"/></svg>,
-  <svg key="f" viewBox="0 0 40 40" fill="none" width="26" height="26"><rect x="4" y="20" width="32" height="12" rx="3" stroke="#d4af37" strokeWidth="1.5"/><rect x="9" y="12" width="22" height="8" rx="2" stroke="#d4af37" strokeWidth="1.5"/><path d="M10 26h20M13 17h14" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round"/></svg>,
-  <svg key="c" viewBox="0 0 40 40" fill="none" width="26" height="26"><rect x="3" y="22" width="34" height="11" rx="3" stroke="#d4af37" strokeWidth="1.5"/><rect x="8" y="14" width="24" height="8" rx="2" stroke="#d4af37" strokeWidth="1.5"/><rect x="13" y="8" width="14" height="6" rx="2" stroke="#d4af37" strokeWidth="1.5"/></svg>,
-  <svg key="g" viewBox="0 0 40 40" fill="none" width="26" height="26"><rect x="2" y="24" width="36" height="10" rx="3" stroke="#d4af37" strokeWidth="1.5"/><rect x="7" y="16" width="26" height="8" rx="2" stroke="#d4af37" strokeWidth="1.5"/><rect x="12" y="9" width="16" height="7" rx="2" stroke="#d4af37" strokeWidth="1.5"/><circle cx="20" cy="5" r="2.5" stroke="#d4af37" strokeWidth="1.3"/></svg>,
-];
-
-// ── Main Component ─────────────────────────────────────────────────────────────
 export default function PortionGuide() {
-  const sectionRef  = useRef(null);
-  const bgRef       = useRef(null);
-  const titleRef    = useRef(null);
-  const subtitleRef = useRef(null);
-  const dividerRef  = useRef(null);
-  const cardsRef    = useRef([]);
-  const cakeRef     = useRef(null);
+  const { portions } = usePublicCatalog();
+  const stageRef = useRef(null);
+  const nearView = useInView(stageRef, { margin: "300px 0px", once: true });
 
-  const [activeIdx, setActiveIdx] = useState(3);
-  // customSlices is reset to the base whenever the card changes
-  const [customSlices, setCustomSlices] = useState(PORTIONS[3].slices);
+  const [activeId, setActiveId] = useState(null);
+  const [cutKey, setCutKey] = useState("estandar");
+  const [arOpen, setArOpen] = useState(false);
 
-  const active = PORTIONS[activeIdx];
+  const active = portions.find((p) => p.id === activeId) || portions[Math.min(3, portions.length - 1)];
+  const cut = CUTS.find((c) => c.key === cutKey);
+  const slices = active ? Math.max(1, Math.round(active.slices * cut.factor)) : 0;
+  const weight = useMemo(() => (active ? estimateWeightKg(active) : 0), [active]);
 
-  const handleCardSelect = useCallback((i) => {
-    setActiveIdx(i);
-    setCustomSlices(PORTIONS[i].slices);
-  }, []);
-
-  // ── GSAP ScrollTrigger ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.to(bgRef.current, {
-        yPercent: -18, ease: "none",
-        scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "bottom top", scrub: 1.2 },
-      });
-
-      gsap.fromTo(titleRef.current, { opacity: 0, y: 60, scale: 0.94 }, {
-        opacity: 1, y: 0, scale: 1, duration: 1, ease: "power3.out",
-        scrollTrigger: { trigger: titleRef.current, start: "top 82%", toggleActions: "play none none none" },
-      });
-
-      gsap.fromTo([subtitleRef.current, dividerRef.current], { opacity: 0, y: 30 }, {
-        opacity: 1, y: 0, duration: 0.8, ease: "power2.out", stagger: 0.12,
-        scrollTrigger: { trigger: subtitleRef.current, start: "top 85%", toggleActions: "play none none none" },
-      });
-
-      gsap.fromTo(cardsRef.current, { opacity: 0, y: 80, scale: 0.82, rotationX: 14, transformOrigin: "50% 100%" }, {
-        opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 0.9, ease: "power3.out",
-        stagger: { amount: 0.55, from: "start" },
-        scrollTrigger: { trigger: cardsRef.current[0], start: "top 80%", toggleActions: "play none none none" },
-      });
-
-      cardsRef.current.forEach((card, i) => {
-        const depth = (i % 2 === 0 ? -1 : 1) * (8 + i * 2);
-        gsap.to(card, {
-          y: depth, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "bottom top", scrub: 0.8 + i * 0.1 },
-        });
-      });
-
-      gsap.fromTo(cakeRef.current, { opacity: 0, scale: 0.78, y: 40 }, {
-        opacity: 1, scale: 1, y: 0, duration: 1.1, ease: "back.out(1.5)",
-        scrollTrigger: { trigger: cakeRef.current, start: "top 78%", toggleActions: "play none none none" },
-      });
-
-      gsap.to(cakeRef.current, {
-        y: -30, ease: "none",
-        scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "bottom top", scrub: 1.5 },
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+  if (!active) return null;
 
   return (
-    <section ref={sectionRef} className="relative py-32 px-6 overflow-hidden">
-
-      <div ref={bgRef} className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(212,175,55,0.07) 0%, transparent 70%)", transform: "scale(1.3)" }}
-      />
+    <section id="porciones" className="relative py-20 md:py-32 px-4 md:px-6 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(60% 50% at 20% 30%, rgba(212,175,55,0.10), transparent 70%), radial-gradient(50% 40% at 85% 70%, rgba(165,0,89,0.07), transparent 70%)" }} />
 
       <div className="max-w-6xl mx-auto relative z-10">
-
-        {/* Header */}
-        <div className="text-center mb-16 overflow-hidden">
-          <span ref={subtitleRef} className="font-inter text-xs tracking-[0.45em] uppercase font-medium inline-block"
-            style={{ color: "#d4af37", opacity: 0 }}>
-            Referencia
+        <SlideRevealWrapper direction="up" className="text-center mb-8 md:mb-14">
+          <span className="font-inter text-[11px] tracking-[0.4em] uppercase font-medium" style={{ color: "#d4af37" }}>
+            Guía de porciones
           </span>
-          <h2 ref={titleRef} className="font-playfair text-4xl md:text-6xl font-semibold mt-3 leading-tight"
-            style={{ color: "#a50059", opacity: 0 }}>
-            Guía de <span className="italic font-normal" style={{ color: "#d4af37" }}>Porciones</span>
+          <h2 className="font-playfair text-[34px] leading-[1.1] md:text-6xl font-semibold mt-3" style={{ color: "#a50059" }}>
+            ¿Cuántas porciones <span className="italic font-normal" style={{ color: "#d4af37" }}>salen?</span>
           </h2>
-          <div ref={dividerRef} className="w-16 h-[1px] mx-auto mt-6"
-            style={{ background: "linear-gradient(to right, transparent, #d4af37, transparent)", opacity: 0 }} />
-        </div>
+          <p className="font-inter text-sm md:text-base font-light mt-4 max-w-xl mx-auto" style={{ color: "rgba(165,0,89,0.6)" }}>
+            Elige un tamaño, mira la torta en 3D cortada en porciones y ábrela con tu cámara para verla en tamaño real sobre tu mesa.
+          </p>
+        </SlideRevealWrapper>
 
-        {/* Main layout */}
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
-
-          {/* Cards grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4 w-full lg:flex-1">
-            {PORTIONS.map((p, i) => {
-              const isActive = i === activeIdx;
-              return (
-                <div
-                  key={p.label}
-                  ref={(el) => (cardsRef.current[i] = el)}
-                  onClick={() => handleCardSelect(i)}
-                  className={`flex flex-col items-center gap-2 p-5 rounded-3xl text-center cursor-pointer select-none ${isActive ? "is-active" : ""}`}
-                  style={{
-                    background: isActive ? "rgba(212,175,55,0.13)" : "rgba(253,250,245,0.72)",
-                    backdropFilter: "blur(14px)",
-                    border: isActive ? "1.5px solid rgba(212,175,55,0.5)" : "1px solid rgba(212,175,55,0.12)",
-                    boxShadow: isActive ? "0 16px 48px rgba(165,0,89,0.11), 0 4px 12px rgba(212,175,55,0.1)" : "0 4px 20px rgba(165,0,89,0.04)",
-                    transform: isActive ? "translateY(-6px)" : "translateY(0px)",
-                    transition: "background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1)",
-                    willChange: "transform",
-                  }}
-                >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: isActive ? "rgba(212,175,55,0.18)" : "rgba(212,175,55,0.08)" }}>
-                    {ICONS[i]}
-                  </div>
-                  <span className="font-inter text-[11px] font-semibold tracking-[0.1em] uppercase" style={{ color: "#a50059" }}>{p.label}</span>
-                  <span className="font-inter text-[10px] font-light" style={{ color: "rgba(165,0,89,0.5)" }}>{p.value}</span>
-                  <span className="font-inter text-[9px] tracking-[0.1em] px-2.5 py-1 rounded-full"
-                    style={{ background: isActive ? "rgba(212,175,55,0.22)" : "rgba(212,175,55,0.08)", color: "#d4af37" }}>
-                    {p.size}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* 3D Cake visualizer + Stepper */}
-          <div ref={cakeRef} className="flex-shrink-0 flex flex-col items-center"
-            style={{ width: "min(360px, 90vw)", opacity: 0, willChange: "transform" }}>
-            <div className="w-full rounded-3xl p-7 flex flex-col items-center gap-4"
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-5 md:gap-8 items-start">
+          {/* ── Escenario 3D ── */}
+          <div className="min-w-0 lg:sticky lg:top-24">
+            <div
+              ref={stageRef}
+              className="relative rounded-[28px] md:rounded-[36px] overflow-hidden aspect-square md:aspect-[5/4]"
               style={{
-                background: "rgba(253,250,245,0.8)",
-                backdropFilter: "blur(24px)",
-                border: "1px solid rgba(212,175,55,0.18)",
-                boxShadow: "0 28px 70px rgba(165,0,89,0.09), 0 8px 24px rgba(212,175,55,0.07)",
-              }}>
+                background: "radial-gradient(90% 70% at 50% 35%, #fffafc 0%, #f8e8ef 55%, #f1d9e4 100%)",
+                border: "1px solid rgba(212,175,55,0.22)",
+                boxShadow: "0 30px 80px rgba(165,0,89,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
+              }}
+            >
+              {nearView && <CakeViewer portion={active} slices={slices} />}
 
-              {/* Cake SVG */}
-              <div style={{ width: "100%", aspectRatio: "16/9", position: "relative" }}>
-                <IsoCake key={`cake-${activeIdx}`} slices={customSlices} />
+              {/* Datos flotantes */}
+              <div className="absolute top-3 left-3 right-3 flex justify-between gap-2 pointer-events-none">
+                <Chip icon={<Ruler size={12} />} text={`Ø ${active.diameter} cm`} />
+                <Chip icon={<Layers size={12} />} text={active.tiers > 1 ? `${active.tiers} pisos` : `${active.height} cm alto`} />
               </div>
 
-              {/* Label */}
-              <AnimatePresence mode="wait">
-                <motion.div key={`label-${activeIdx}`} className="text-center"
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.32, ease: EASE }}>
-                  <p className="font-playfair text-xl font-semibold" style={{ color: "#a50059" }}>{active.label}</p>
-                  <p className="font-inter text-xs font-light mt-0.5" style={{ color: "rgba(165,0,89,0.45)" }}>
-                    {active.value} · {active.size !== "Consultar" ? `Ø ${active.size}` : "Bajo pedido"}
+              <div className="absolute left-3 bottom-3 pointer-events-none">
+                <div className="rounded-2xl px-4 py-2.5"
+                  style={{ background: "rgba(253,250,245,0.82)", backdropFilter: "blur(14px)", border: "1px solid rgba(212,175,55,0.2)" }}>
+                  <p className="font-playfair text-4xl md:text-5xl font-semibold leading-none" style={{ color: "#a50059" }}>
+                    <CountUp value={slices} />
                   </p>
-                </motion.div>
-              </AnimatePresence>
+                  <p className="font-inter text-[10px] tracking-[0.2em] uppercase mt-1" style={{ color: "#d4af37" }}>porciones</p>
+                </div>
+              </div>
 
-              {/* Stepper simulator */}
-              <SliceStepper
-                base={active.slices}
-                customSlices={customSlices}
-                onChange={setCustomSlices}
-              />
+              <button
+                onClick={() => setArOpen(true)}
+                className="ar-cta absolute right-3 bottom-3 flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full font-inter text-[12px] font-semibold tracking-wide active:scale-95 transition-transform"
+                style={{ background: "linear-gradient(135deg,#a50059,#7d0044)", color: "#fdfaf5", boxShadow: "0 12px 30px rgba(165,0,89,0.35)" }}
+              >
+                <Camera size={16} /> Ver en mi espacio
+              </button>
             </div>
-
-            <p className="font-inter text-[10px] mt-4 text-center" style={{ color: "rgba(165,0,89,0.2)" }}>
-              Ajusta las porciones con los controles ± para simular el corte
+            <p className="font-inter text-[11px] text-center mt-3" style={{ color: "rgba(165,0,89,0.4)" }}>
+              Gira la torta con el dedo · la porción separada es una porción {cut.label.toLowerCase()}
             </p>
+          </div>
+
+          {/* ── Controles ── */}
+          <div className="min-w-0 flex flex-col gap-4 md:gap-5">
+            {/* Tamaños */}
+            <Panel title="1. Elige el tamaño">
+              <div className="flex lg:grid lg:grid-cols-2 gap-2.5 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 lg:mx-0 lg:px-0 pb-1 no-scrollbar">
+                {portions.map((p) => {
+                  const on = p.id === active.id;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setActiveId(p.id)}
+                      className="snap-start shrink-0 w-[150px] lg:w-auto text-left rounded-2xl p-3.5 transition-all duration-300 active:scale-[0.97]"
+                      style={{
+                        background: on ? "linear-gradient(140deg,#a50059,#7d0044)" : "rgba(253,250,245,0.8)",
+                        border: on ? "1px solid transparent" : "1px solid rgba(212,175,55,0.18)",
+                        boxShadow: on ? "0 14px 34px rgba(165,0,89,0.25)" : "0 2px 10px rgba(165,0,89,0.04)",
+                        color: on ? "#fdfaf5" : "#a50059",
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-inter text-[12px] font-semibold tracking-wide">{p.label}</span>
+                        <span className="rounded-full" style={{
+                          width: 10 + (p.diameter / 30) * 14, height: 10 + (p.diameter / 30) * 14,
+                          border: `1.5px solid ${on ? "#f3d27a" : "#d4af37"}`, opacity: 0.9,
+                        }} />
+                      </div>
+                      <p className="font-inter text-[11px] mt-1 opacity-80">{p.people}</p>
+                      <p className="font-inter text-[10px] mt-1.5 tracking-wide" style={{ color: on ? "#f3d27a" : "#d4af37" }}>
+                        Ø {p.diameter} cm{p.tiers > 1 ? ` · ${p.tiers} pisos` : ""}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </Panel>
+
+            {/* Corte */}
+            <Panel title="2. ¿Cómo la vas a cortar?">
+              <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl" style={{ background: "rgba(212,175,55,0.1)" }}>
+                {CUTS.map((c) => (
+                  <button
+                    key={c.key}
+                    onClick={() => setCutKey(c.key)}
+                    className="relative py-2.5 rounded-xl font-inter text-[12px] font-semibold transition-colors"
+                    style={{ color: cutKey === c.key ? "#fdfaf5" : "#a50059" }}
+                  >
+                    {cutKey === c.key && (
+                      <motion.span layoutId="cut-pill" className="absolute inset-0 rounded-xl"
+                        style={{ background: "linear-gradient(135deg,#d4af37,#b8912a)" }}
+                        transition={{ duration: 0.35, ease: EASE }} />
+                    )}
+                    <span className="relative">{c.label}</span>
+                  </button>
+                ))}
+              </div>
+              <AnimatePresence mode="wait">
+                <motion.p key={cutKey} className="font-inter text-[12px] mt-2.5 leading-relaxed" style={{ color: "rgba(165,0,89,0.6)" }}
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.25 }}>
+                  {cut.note}
+                </motion.p>
+              </AnimatePresence>
+            </Panel>
+
+            {/* Personas */}
+            <Panel title={`3. Alcanza para ${slices} ${slices === 1 ? "persona" : "personas"}`}>
+              <PeopleGrid count={slices} />
+            </Panel>
+
+            {/* Comparación */}
+            <Panel title="Compara los tamaños">
+              <div className="flex items-center gap-4">
+                <div className="w-[120px] h-[120px] shrink-0">
+                  <SizeRings portions={portions} activeId={active.id} onSelect={setActiveId} />
+                </div>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 font-inter text-[12px] flex-1">
+                  <Stat label="Diámetro" value={`${active.diameter} cm`} />
+                  <Stat label="Alto" value={`${active.height} cm${active.tiers > 1 ? " c/u" : ""}`} />
+                  <Stat label="Peso aprox." value={`${weight.toFixed(1)} kg`} icon={<Weight size={11} />} />
+                  <Stat label="Porción" value={`${Math.round((weight * 1000) / slices)} g`} />
+                </dl>
+              </div>
+            </Panel>
           </div>
         </div>
 
-        <p className="font-inter text-[11px] text-center mt-12 font-light" style={{ color: "rgba(165,0,89,0.28)" }}>
-          * Las porciones son estimados. Para eventos especiales, consulta con nosotros.
+        <p className="font-inter text-[11px] text-center mt-10 font-light" style={{ color: "rgba(165,0,89,0.35)" }}>
+          * Las porciones y el peso son estimados. Para eventos especiales, escríbenos y te asesoramos.
         </p>
       </div>
+
+      <AnimatePresence>
+        {arOpen && (
+          <CakeARModal portions={portions} initialPortionId={active.id} onClose={() => setArOpen(false)} />
+        )}
+      </AnimatePresence>
     </section>
+  );
+}
+
+function Chip({ icon, text }) {
+  return (
+    <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 font-inter text-[11px] font-medium"
+      style={{ background: "rgba(253,250,245,0.82)", backdropFilter: "blur(10px)", color: "#a50059", border: "1px solid rgba(212,175,55,0.2)" }}>
+      <span style={{ color: "#d4af37" }}>{icon}</span>{text}
+    </span>
+  );
+}
+
+function Panel({ title, children }) {
+  return (
+    <div className="rounded-3xl p-4 md:p-5"
+      style={{ background: "rgba(253,250,245,0.72)", backdropFilter: "blur(16px)", border: "1px solid rgba(212,175,55,0.14)", boxShadow: "0 10px 30px rgba(165,0,89,0.05)" }}>
+      <h3 className="font-inter text-[11px] tracking-[0.18em] uppercase font-semibold mb-3" style={{ color: "#a50059" }}>{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function Stat({ label, value, icon }) {
+  return (
+    <div>
+      <dt className="text-[10px] tracking-[0.12em] uppercase flex items-center gap-1" style={{ color: "rgba(165,0,89,0.45)" }}>{icon}{label}</dt>
+      <dd className="font-playfair text-[17px] font-semibold" style={{ color: "#a50059" }}>{value}</dd>
+    </div>
   );
 }
