@@ -7,8 +7,8 @@ export default function LoadingScreen({ onComplete }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onComplete, 800);
-    }, 2200);
+      setTimeout(onComplete, 600);
+    }, 1400);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -19,7 +19,7 @@ export default function LoadingScreen({ onComplete }) {
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
           style={{ background: "#fdfaf5" }}
           exit={{ y: "-100%", opacity: 0 }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
         >
           <motion.div
             className="flex flex-col items-center gap-4"
@@ -46,7 +46,7 @@ export default function LoadingScreen({ onComplete }) {
             style={{ background: "#d4af37" }}
             initial={{ width: 0 }}
             animate={{ width: 120 }}
-            transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           />
         </motion.div>
       )}

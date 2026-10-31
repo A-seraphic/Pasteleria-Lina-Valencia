@@ -123,3 +123,25 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .ar-cta::after { animation: none; }
 }
+
+/* Texto dorado con brillo que recorre las letras */
+.text-shimmer {
+  background: linear-gradient(100deg, #b8912a 0%, #d4af37 35%, #f7e3a1 50%, #d4af37 65%, #b8912a 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-shimmer 5s ease-in-out infinite;
+}
+@keyframes text-shimmer {
+  0%, 100% { background-position: 100% 0; }
+  50% { background-position: 0% 0; }
+}
+
+/* Cinta de texto infinita */
+.marquee-track { display: flex; width: max-content; animation: marquee 32s linear infinite; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer, .marquee-track { animation: none; }
+}

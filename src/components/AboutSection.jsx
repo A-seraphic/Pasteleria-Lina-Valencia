@@ -76,7 +76,7 @@ export default function AboutSection() {
           className="relative w-full md:w-[55%] flex items-center"
           style={{ background: "hsl(37 60% 97%)" }}
         >
-          <div className="px-10 md:px-16 lg:px-24 py-20 max-w-2xl">
+          <div className="px-6 md:px-16 lg:px-24 py-16 md:py-20 max-w-2xl">
             {/* Label */}
             <motion.span
               className="font-inter text-xs tracking-[0.4em] uppercase font-medium block mb-5"

@@ -4,10 +4,10 @@ import { X, Download, Loader2 } from "lucide-react";
 import ReceiptTemplate from "./ReceiptTemplate";
 import { OPTION_KINDS } from "@/data/defaults";
 import useScrollLock from "@/hooks/useScrollLock";
+import { whatsappUrl } from "@/data/site";
 
 const EASE = [0.22, 1, 0.36, 1];
 
-const WHATSAPP = "573001234567";
 
 const inputStyle = {
   background: "rgba(253,250,245,0.7)",
@@ -87,7 +87,7 @@ export default function OrderForm({ product, subcategory, options = {}, portions
       ``,
       `_(Adjunto la imagen del recibo desde mi galería)_`,
     ];
-    const waUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
+    const waUrl = whatsappUrl(lines.join("\n"));
     setTimeout(() => window.open(waUrl, "_blank"), 400);
   };
 

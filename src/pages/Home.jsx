@@ -12,6 +12,8 @@ import VideoRevealSection from "../components/VideoRevealSection";
 import AboutSection from "../components/AboutSection";
 import ContactSection from "../components/ContactSection";
 import FooterSection from "../components/FooterSection";
+import Marquee from "../components/Marquee";
+import { ScrollProgress, WhatsAppFab } from "../components/ScrollExtras";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 
 export default function Home() {
@@ -29,9 +31,12 @@ export default function Home() {
       <div style={{ visibility: isLoading ? "hidden" : "visible" }}>
         <OrganicBackground />
         <ParallaxHearts />
+        <ScrollProgress />
         <CapsuleNavbar />
+        <WhatsAppFab />
         <main className="relative z-10">
           <HeroSection />
+          <Marquee />
           <CatalogSection />
           <PortionGuide />
           <PersonalizadasSection />
