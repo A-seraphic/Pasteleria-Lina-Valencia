@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Great+Vibes&family=Montserrat:wght@500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -184,3 +184,27 @@ body { background: var(--lv-cream); }
     linear-gradient(#000 0 0) top / 100% calc(100% - var(--zig) + 1px) no-repeat;
   filter: drop-shadow(0 18px 24px rgba(92, 0, 50, 0.16));
 }
+
+/* ── Identidad de marca (manual de Lina Valencia) ─────────────────── */
+:root {
+  --lv-fuchsia: #e91e8c;
+  --lv-rose: #f8bbd0;
+  --lv-rose-soft: #fde4ee;
+}
+.font-script { font-family: "Great Vibes", cursive; font-weight: 400; letter-spacing: 0; }
+.font-brand-caps { font-family: "Montserrat", sans-serif; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; }
+
+/* Cinta de encaje con borde festoneado y perlas doradas */
+.lace-band { position: relative; background: var(--lv-rose); margin-block: 14px; }
+.lace-band::before, .lace-band::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 14px;
+  background-repeat: repeat-x; background-size: 26px 14px;
+}
+.lace-band::before { top: -13px; background-image: radial-gradient(circle at 13px 14px, var(--lv-rose) 12px, transparent 12.5px); }
+.lace-band::after { bottom: -13px; background-image: radial-gradient(circle at 13px 0, var(--lv-rose) 12px, transparent 12.5px); }
+.pearl-row {
+  height: 8px; margin-inline: 6px;
+  background: radial-gradient(circle, #f3dc9a 0 1.6px, var(--lv-gold) 2.2px, transparent 3px) repeat-x center / 13px 8px;
+}
+.lace-track { animation-duration: 48s; }
+.lace-band:hover .lace-track { animation-play-state: paused; }

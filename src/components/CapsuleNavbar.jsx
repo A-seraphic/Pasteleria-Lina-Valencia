@@ -92,8 +92,13 @@ export default function CapsuleNavbar() {
       >
         <div className="max-w-[1400px] mx-auto h-16 md:h-[76px] px-5 md:px-10 flex items-center justify-between gap-6">
           <button onClick={() => (open ? setOpen(false) : scrollToId("#inicio"))} aria-label="Lina Valencia, inicio"
-            className="font-display text-[22px] md:text-[26px] font-semibold leading-none"
-            style={{ color: open ? "var(--lv-cream)" : "var(--lv-wine)", transition: "color .3s" }}>
+            className="font-script text-[32px] md:text-[38px] leading-none pt-1"
+            style={{
+              color: open ? "var(--lv-cream)" : "var(--lv-fuchsia)",
+              // arriba del todo ya se ve el logo grande del inicio
+              opacity: scrolled || open ? 1 : 0,
+              transition: "color .3s, opacity .4s",
+            }}>
             Lina Valencia
           </button>
 

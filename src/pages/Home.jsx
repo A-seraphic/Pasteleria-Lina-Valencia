@@ -33,7 +33,7 @@ export default function Home() {
         <CapsuleNavbar />
         <WhatsAppFab />
         <main className="relative z-10">
-          <HeroSection />
+          <HeroSection ready={!isLoading} />
           <Marquee />
           <CatalogSection />
           <PersonalizadasSection />

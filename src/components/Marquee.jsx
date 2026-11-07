@@ -1,35 +1,51 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useVelocity, useSpring } from "framer-motion";
 import { usePublicCatalog } from "@/data/catalogStore";
+import { BRAND_ICONS } from "./fx/BrandIcons";
+import { scrollToId } from "@/data/site";
 
-// Cinta inclinada con las categorías del catálogo; se desplaza sola y con el scroll
+/**
+ * Cinta de encaje: borde festoneado como blonda de pastelería, perlas doradas
+ * de glaseado y las categorías en letra script. Corre sola y se inclina
+ * levemente según la velocidad del scroll.
+ */
 export default function Marquee() {
   const { categories } = usePublicCatalog();
   const { scrollY } = useScroll();
-  const x = useTransform(scrollY, [0, 3000], [0, -260]);
-  const words = categories.map((c) => c.name);
-  if (!words.length) return null;
-  const row = [...words, ...words];
+  const x = useTransform(scrollY, [0, 3000], [0, -220]);
+  const velocity = useVelocity(scrollY);
+  const skew = useSpring(useTransform(velocity, [-2500, 0, 2500], [4, 0, -4]), { stiffness: 200, damping: 30 });
+  if (!categories.length) return null;
+  const row = [...categories, ...categories];
 
   return (
-    <div className="relative z-10 py-6 md:py-10 overflow-hidden" aria-hidden>
-      <motion.div
-        className="py-3.5 md:py-5 -rotate-2 -mx-[5%] w-[110%]"
-        style={{ background: "linear-gradient(90deg,#a50059,#7d0044)", boxShadow: "0 20px 40px rgba(165,0,89,0.22)" }}
-      >
-        <motion.div style={{ x }}>
-          <div className="marquee-track">
+    <div className="relative z-0 pt-16 md:pt-24 pb-8 md:pb-12 overflow-hidden">
+      <motion.div className="lace-band" style={{ skewY: skew }}>
+        <div aria-hidden className="pearl-row" />
+        <motion.div style={{ x }} className="py-3 md:py-4">
+          <div className="marquee-track lace-track">
             {[0, 1].map((k) => (
-              <div key={k} className="flex items-center shrink-0">
-                {row.map((w, i) => (
-                  <span key={`${k}-${i}`} className="flex items-center font-playfair italic text-xl md:text-3xl whitespace-nowrap px-5 md:px-8" style={{ color: "#fdfaf5" }}>
-                    {w}
-                    <span className="ml-10 md:ml-16 text-base not-italic" style={{ color: "#d4af37" }}>✦</span>
-                  </span>
-                ))}
+              <div key={k} className="flex items-center shrink-0" aria-hidden={k === 1}>
+                {row.map((c, i) => {
+                  const Icon = BRAND_ICONS[i % BRAND_ICONS.length];
+                  return (
+                    <span key={`${k}-${i}`} className="flex items-center">
+                      <button
+                        tabIndex={k === 1 ? -1 : 0}
+                        onClick={() => scrollToId("#catalogo")}
+                        className="font-script whitespace-nowrap px-6 md:px-9 text-[38px] md:text-[54px] leading-[1.25] transition-colors hover:text-[var(--lv-fuchsia)]"
+                        style={{ color: "var(--lv-wine)" }}
+                      >
+                        {c.name}
+                      </button>
+                      <Icon size={26} color="var(--lv-gold)" />
+                    </span>
+                  );
+                })}
               </div>
             ))}
           </div>
         </motion.div>
+        <div aria-hidden className="pearl-row" />
       </motion.div>
     </div>
   );
