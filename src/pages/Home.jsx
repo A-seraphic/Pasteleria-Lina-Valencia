@@ -1,13 +1,12 @@
 import { useState, useCallback } from "react";
 import LoadingScreen from "../components/LoadingScreen";
 import CapsuleNavbar from "../components/CapsuleNavbar";
-import ParallaxHearts from "../components/ParallaxHearts";
-import OrganicBackground from "../components/OrganicBackground";
 import HeroSection from "../components/HeroSection";
 import EssenceSection from "../components/EssenceSection";
 import CatalogSection from "../components/CatalogSection";
 import PortionGuide from "../components/PortionGuide";
 import PersonalizadasSection from "../components/PersonalizadasSection";
+import HowToOrder from "../components/HowToOrder";
 import VideoRevealSection from "../components/VideoRevealSection";
 import AboutSection from "../components/AboutSection";
 import ContactSection from "../components/ContactSection";
@@ -16,6 +15,7 @@ import Marquee from "../components/Marquee";
 import { ScrollProgress, WhatsAppFab } from "../components/ScrollExtras";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 
+// Orden: qué hacen → el catálogo → lo personalizado → el tamaño → cómo pedir → quiénes son → contacto
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   useSmoothScroll({ ease: 0.075 });
@@ -25,12 +25,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden font-inter">
+    <div className="relative min-h-screen overflow-x-clip font-inter">
       <LoadingScreen onComplete={handleLoadComplete} />
 
       <div style={{ visibility: isLoading ? "hidden" : "visible" }}>
-        <OrganicBackground />
-        <ParallaxHearts />
         <ScrollProgress />
         <CapsuleNavbar />
         <WhatsAppFab />
@@ -38,14 +36,15 @@ export default function Home() {
           <HeroSection />
           <Marquee />
           <CatalogSection />
-          <PortionGuide />
           <PersonalizadasSection />
+          <PortionGuide />
+          <HowToOrder />
           <VideoRevealSection />
-          <EssenceSection />
           <AboutSection />
+          <EssenceSection />
           <ContactSection />
-          <FooterSection />
         </main>
+        <FooterSection />
       </div>
     </div>
   );

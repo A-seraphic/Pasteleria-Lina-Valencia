@@ -1,82 +1,62 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import SlideRevealWrapper from "./SlideRevealWrapper";
-import { Heart, Sparkles, Leaf } from "lucide-react";
+import { Reveal, RevealItem, SplitTitle } from "./fx/Reveal";
+
+const BASE = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/";
 
 const essenceItems = [
   {
-    icon: Heart,
-    title: "Hecho con Amor",
-    desc: "Cada creación nace de la pasión por el detalle y el cariño por lo artesanal. Nuestros postres llevan el corazón de Lina en cada capa.",
+    title: "Hecho con amor",
+    desc: "Cada creación nace del detalle y del cariño por lo artesanal. Nuestros postres llevan el corazón de Lina en cada capa.",
+    img: `${BASE}13e00a964_icon_personalizadas.png`,
   },
   {
-    icon: Sparkles,
-    title: "Ingredientes Selectos",
-    desc: "Utilizamos solo los ingredientes más finos: vainilla de Madagascar, chocolate belga y frutas de temporada cuidadosamente seleccionadas.",
+    title: "Ingredientes selectos",
+    desc: "Vainilla de Madagascar, chocolate belga y frutas de temporada elegidas a mano, sin atajos ni premezclas.",
+    img: `${BASE}0ef810e6b_icon_ponques.png`,
   },
   {
-    icon: Leaf,
-    title: "Tradición Renovada",
-    desc: "Fusionamos recetas heredadas con técnicas modernas de repostería francesa, creando sabores que evocan recuerdos y sorprenden al paladar.",
+    title: "Tradición renovada",
+    desc: "Recetas heredadas con técnicas de repostería francesa: sabores que recuerdan a casa y sorprenden en la mesa.",
+    img: `${BASE}7c3e75a0b_icon_postres.png`,
   },
 ];
 
-function EssenceCard({ item, index, progress }) {
-  const Icon = item.icon;
-  // Cada tarjeta sube a distinta velocidad: sensación de capas en escritorio
-  const y = useTransform(progress, [0, 1], [40 * (index + 1), -40 * (index + 1)]);
+function EssenceRow({ item, index }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const imgY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  const flip = index % 2 === 1;
+
   return (
-    <motion.article
-      style={{ y }}
-      className="essence-card snap-center shrink-0 w-[82%] sm:w-[60%] md:w-auto relative p-7 md:p-8 rounded-[28px] overflow-hidden"
-    >
-      <div className="absolute inset-0 -z-10" style={{
-        background: "linear-gradient(160deg, rgba(253,250,245,0.92), rgba(248,232,240,0.85))",
-        border: "1px solid rgba(212,175,55,0.18)", borderRadius: 28,
-        boxShadow: "0 24px 60px -18px rgba(165,0,89,0.18)",
-      }} />
-      <span aria-hidden className="absolute -top-4 right-3 font-playfair text-[110px] font-semibold leading-none select-none"
-        style={{ color: "rgba(212,175,55,0.13)" }}>
-        0{index + 1}
-      </span>
-      <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
-        style={{
-          background: "linear-gradient(145deg,#a50059,#6e003c)",
-          boxShadow: "0 12px 24px rgba(165,0,89,0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
-        }}>
-        <Icon size={24} style={{ color: "#f7e3a1" }} />
+    <Reveal as="article" className={`grid md:grid-cols-2 gap-6 md:gap-16 items-center ${flip ? "md:[&>*:first-child]:order-2" : ""}`}>
+      <RevealItem y={40}>
+        <div ref={ref} className="relative aspect-[5/4] md:aspect-[4/3] rounded-[26px] md:rounded-[34px] overflow-hidden" style={{ background: "var(--lv-blush)" }}>
+          <motion.img src={item.img} alt="" loading="lazy" className="absolute inset-0 w-full h-[120%] -top-[10%] object-cover" style={{ y: imgY }} />
+        </div>
+      </RevealItem>
+      <div>
+        <RevealItem as="h3" className="font-display font-semibold text-[36px] md:text-[56px] leading-[1]" style={{ color: "var(--lv-wine)" }}>
+          {item.title}
+        </RevealItem>
+        <RevealItem as="p" className="font-inter text-[17px] md:text-[19px] leading-relaxed mt-4 max-w-[38ch]" style={{ color: "var(--lv-ink)" }}>
+          {item.desc}
+        </RevealItem>
       </div>
-      <h3 className="font-playfair text-[22px] font-semibold mb-3" style={{ color: "#a50059" }}>{item.title}</h3>
-      <p className="font-inter text-[14px] leading-relaxed font-light" style={{ color: "rgba(165,0,89,0.6)" }}>{item.desc}</p>
-    </motion.article>
+    </Reveal>
   );
 }
 
 export default function EssenceSection() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const desktopProgress = useTransform(scrollYProgress, (v) => (window.innerWidth >= 768 ? v : 0.5));
-
   return (
-    <section ref={ref} id="esencia" className="relative py-20 md:py-36">
-      <div className="max-w-5xl mx-auto">
-        <SlideRevealWrapper direction="up" className="text-center mb-10 md:mb-16 px-6">
-          <span className="font-inter text-[11px] tracking-[0.4em] uppercase font-medium" style={{ color: "#d4af37" }}>
-            Lo que nos hace únicos
-          </span>
-          <h2 className="font-playfair text-[34px] md:text-5xl font-semibold mt-3" style={{ color: "#a50059" }}>
-            Nuestra <span className="italic font-normal text-shimmer">Esencia</span>
-          </h2>
-        </SlideRevealWrapper>
-
-        <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory px-6 pb-4 no-scrollbar">
+    <section id="esencia" className="relative py-20 md:py-32">
+      <div className="max-w-[1200px] mx-auto px-5 md:px-10">
+        <SplitTitle lines={["Lo que nos", "hace distintos"]} className="font-display font-semibold text-[44px] md:text-[84px] leading-[0.98] mb-12 md:mb-20" />
+        <div className="space-y-16 md:space-y-28">
           {essenceItems.map((item, i) => (
-            <EssenceCard key={item.title} item={item} index={i} progress={desktopProgress} />
+            <EssenceRow key={item.title} item={item} index={i} />
           ))}
         </div>
-        <p className="md:hidden text-center font-inter text-[11px] mt-2" style={{ color: "rgba(165,0,89,0.35)" }}>
-          Desliza para ver más →
-        </p>
       </div>
     </section>
   );

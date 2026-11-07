@@ -10,12 +10,9 @@ const EASE = [0.22, 1, 0.36, 1];
 
 
 const inputStyle = {
-  background: "rgba(253,250,245,0.7)",
-  border: "1px solid rgba(212,175,55,0.2)",
-  color: "#a50059",
+  background: "var(--lv-cream-2)",
+  color: "var(--lv-ink)",
 };
-const focusBorder = "rgba(212,175,55,0.55)";
-const blurBorder  = "rgba(212,175,55,0.2)";
 
 function generateOrderCode() {
   const year = new Date().getFullYear();
@@ -99,199 +96,130 @@ export default function OrderForm({ product, subcategory, options = {}, portions
       <AnimatePresence>
         <motion.div
           data-scroll-lock
-          className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain"
-          style={{ background: "rgba(165,0,89,0.08)", backdropFilter: "blur(8px)" }}
+          className="fixed inset-0 z-[85] flex items-end sm:items-center justify-center sm:p-4 overflow-y-auto overscroll-contain"
+          style={{ background: "rgba(43,0,23,0.45)" }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="relative w-full max-w-md rounded-3xl p-6 sm:p-8 my-4"
-            style={{
-              background: "rgba(253,250,245,0.92)",
-              backdropFilter: "blur(28px)",
-              border: "1px solid rgba(212,175,55,0.2)",
-              boxShadow: "0 32px 80px rgba(165,0,89,0.14), 0 8px 24px rgba(212,175,55,0.08)",
-            }}
-            initial={{ opacity: 0, scale: 0.9, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ duration: 0.5, ease: EASE }}
+            className="relative w-full max-w-lg rounded-t-[30px] sm:rounded-[30px] px-5 pt-3 pb-0 sm:px-8 sm:pt-8 max-h-[92dvh] overflow-y-auto overscroll-contain"
+            style={{ background: "var(--lv-cream)", boxShadow: "0 -20px 60px rgba(92,0,50,0.18)" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.55, ease: EASE }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close */}
+            <div aria-hidden className="sm:hidden mx-auto mb-4 w-10 h-1.5 rounded-full" style={{ background: "rgba(74,0,40,0.15)" }} />
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
-              style={{ background: "rgba(165,0,89,0.07)", color: "#a50059" }}
+              aria-label="Cerrar"
+              className="btn-press absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "var(--lv-cream-2)", color: "var(--lv-wine)" }}
             >
-              <X size={15} />
+              <X size={17} />
             </button>
 
             {/* ── STEP: FORM ─────────────────────────────────────────────── */}
             {step === "form" && (
               <>
-                <div className="mb-5">
-                  <span className="font-inter text-[10px] tracking-[0.3em] uppercase font-medium" style={{ color: "#d4af37" }}>
-                    Personalizar pedido
-                  </span>
-                  <h3 className="font-playfair text-2xl font-semibold mt-1" style={{ color: "#a50059" }}>
-                    {product.name}
+                <div className="pr-12">
+                  <p className="font-inter text-[14px]" style={{ color: "#8a6a1f" }}>{product.name}</p>
+                  <h3 className="font-display text-[30px] font-semibold leading-tight" style={{ color: "var(--lv-wine)" }}>
+                    Personaliza tu pedido
                   </h3>
-                  <p className="font-inter text-sm font-light italic mt-0.5" style={{ color: "#d4af37" }}>
-                    {subcategory?.name}
-                  </p>
                 </div>
-                <div className="h-[1px] w-10 mb-5" style={{ background: "#d4af37" }} />
 
-                <div className="space-y-4">
-                  <Field label="Variedad / Sabor del postre">
-                    <select value={sabor} onChange={(e) => setSabor(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none appearance-none" style={inputStyle}>
-                      {product.subcategories.map((s) => (
-                        <option key={s.name} value={s.name}>{s.name}</option>
-                      ))}
-                    </select>
+                <div className="space-y-6 mt-6">
+                  <Field label="Diseño">
+                    <ChipGroup items={product.subcategories.map((s) => s.name)} value={sabor} onChange={setSabor} />
                   </Field>
 
                   {OPTION_KINDS.filter((k) => k.kind !== "extra" && options[k.kind]).map((k) => (
                     <Field key={k.kind} label={k.short}>
-                      <select value={picks[k.kind]} onChange={(e) => setPicks((p) => ({ ...p, [k.kind]: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none appearance-none" style={inputStyle}>
-                        {options[k.kind].map((o) => (
-                          <option key={o.id} value={o.name}>{o.name}</option>
-                        ))}
-                        <option value="Por definir">Por definir / Consultar</option>
-                      </select>
+                      <ChipGroup items={[...options[k.kind].map((o) => o.name), "Por definir"]} value={picks[k.kind]}
+                        onChange={(v) => setPicks((p) => ({ ...p, [k.kind]: v }))} />
                     </Field>
                   ))}
 
                   {options.extra && (
-                    <Field label="Adicionales">
-                      <div className="flex flex-wrap gap-2">
-                        {options.extra.map((o) => {
-                          const on = extras.includes(o.name);
-                          return (
-                            <button key={o.id} type="button"
-                              onClick={() => setExtras((x) => (on ? x.filter((n) => n !== o.name) : [...x, o.name]))}
-                              className="px-3 py-2 rounded-full font-inter text-xs transition-colors"
-                              style={{ background: on ? "#a50059" : "rgba(253,250,245,0.7)", color: on ? "#fdfaf5" : "#a50059", border: "1px solid rgba(212,175,55,0.25)" }}>
-                              {on ? "✓ " : "+ "}{o.name}
-                            </button>
-                          );
-                        })}
-                      </div>
+                    <Field label="Adicionales (puedes elegir varios)">
+                      <ChipGroup multi items={options.extra.map((o) => o.name)} value={extras}
+                        onChange={(name) => setExtras((x) => (x.includes(name) ? x.filter((n) => n !== name) : [...x, name]))} />
                     </Field>
                   )}
 
                   <Field label={portions.length ? "Tamaño" : "Cantidad de porciones"}>
                     {portions.length ? (
-                      <select value={porciones} onChange={(e) => setPorciones(e.target.value)}
-                        className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none appearance-none" style={inputStyle}>
-                        <option value="">Elige un tamaño</option>
-                        {portions.map((p) => {
-                          const text = `${p.label} · Ø ${p.diameter} cm · ${p.people}`;
-                          return <option key={p.id} value={text}>{text}</option>;
-                        })}
-                      </select>
+                      <ChipGroup items={portions.map((p) => `${p.label} · Ø ${p.diameter} cm · ${p.people}`)} value={porciones} onChange={setPorciones} />
                     ) : (
-                      <input type="number" min="1" placeholder="Ej: 12"
+                      <input type="number" min="1" placeholder="Ej: 12" inputMode="numeric"
                         value={porciones} onChange={(e) => setPorciones(e.target.value)}
-                        className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none" style={inputStyle}
-                        onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                        onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
+                        className="w-full px-4 py-3.5 rounded-2xl font-inter text-base outline-none" style={inputStyle} />
                     )}
                   </Field>
 
                   <Field label="Fecha del evento">
                     <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none"
-                      style={{ ...inputStyle, colorScheme: "light" }}
-                      onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                      onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
+                      className="w-full px-4 py-3.5 rounded-2xl font-inter text-base outline-none"
+                      style={{ ...inputStyle, colorScheme: "light" }} />
                   </Field>
 
-                  <Field label="Descripción / Cambios especiales">
-                    <textarea rows={3} placeholder="Ej: Sin gluten, mensaje personalizado, color específico..."
+                  <Field label="Mensaje o cambios especiales">
+                    <textarea rows={3} placeholder="Ej: sin gluten, nombre en el topper, colores…"
                       value={detalles} onChange={(e) => setDetalles(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl font-inter text-base sm:text-sm outline-none resize-none" style={inputStyle}
-                      onFocus={(e) => (e.target.style.borderColor = focusBorder)}
-                      onBlur={(e) => (e.target.style.borderColor = blurBorder)} />
+                      className="w-full px-4 py-3.5 rounded-2xl font-inter text-base outline-none resize-none" style={inputStyle} />
                   </Field>
                 </div>
 
-                <div className="mt-5 px-4 py-3 rounded-2xl flex items-center justify-between"
-                  style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.12)" }}>
-                  <span className="font-inter text-[10px] tracking-[0.15em] uppercase" style={{ color: "rgba(165,0,89,0.4)" }}>
-                    Precio referencia
-                  </span>
-                  <span className="font-playfair text-lg font-semibold" style={{ color: "#d4af37" }}>
-                    {subcategory?.price}
-                  </span>
+                <div className="sticky bottom-0 -mx-5 sm:-mx-8 mt-6 px-5 sm:px-8 pt-3 pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-8" style={{ background: "var(--lv-cream)" }}>
+                  <div className="flex items-baseline justify-between mb-3">
+                    <span className="font-inter text-[14px]" style={{ color: "rgba(74,0,40,0.65)" }}>Precio de referencia</span>
+                    <span className="font-display text-[24px] font-semibold" style={{ color: "var(--lv-wine)" }}>{subcategory?.price}</span>
+                  </div>
+                  <button
+                    onClick={handleConfirm}
+                    className="btn-press w-full flex items-center justify-center gap-2 py-4 rounded-full font-inter text-[15px] font-semibold"
+                    style={{ background: "var(--lv-wine)", color: "var(--lv-cream)" }}
+                  >
+                    Generar mi recibo
+                  </button>
                 </div>
-
-                <button
-                  onClick={handleConfirm}
-                  className="mt-6 w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-inter text-sm font-semibold tracking-[0.1em] uppercase transition-all duration-500 hover:scale-[1.02] hover:shadow-xl"
-                  style={{ background: "linear-gradient(135deg, #a50059, #8a004c)", color: "#fdfaf5" }}
-                >
-                  Generar Recibo del Pedido ✨
-                </button>
               </>
             )}
 
             {/* ── STEP: GENERATING ─────────────────────────────────────── */}
             {step === "generating" && (
-              <div className="flex flex-col items-center justify-center py-16 gap-5">
-                <Loader2 size={36} className="animate-spin" style={{ color: "#d4af37" }} />
-                <p className="font-inter text-sm font-light" style={{ color: "rgba(165,0,89,0.6)" }}>
-                  Generando tu recibo…
-                </p>
+              <div className="flex flex-col items-center justify-center py-20 gap-5">
+                <Loader2 size={36} className="animate-spin" style={{ color: "var(--lv-gold)" }} />
+                <p className="font-display text-[22px]" style={{ color: "var(--lv-wine)" }}>Imprimiendo tu recibo…</p>
               </div>
             )}
 
             {/* ── STEP: PREVIEW ────────────────────────────────────────── */}
             {step === "preview" && receiptImg && (
-              <motion.div
-                className="flex flex-col items-center gap-5"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: EASE }}
-              >
-                <div className="text-center mb-1">
-                  <span className="font-inter text-[10px] tracking-[0.3em] uppercase font-medium" style={{ color: "#d4af37" }}>
-                    Tu recibo está listo
-                  </span>
-                  <h3 className="font-playfair text-xl font-semibold mt-1" style={{ color: "#a50059" }}>
-                    {orderCode.current}
-                  </h3>
+              <motion.div className="pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-8"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }}>
+                <p className="font-inter text-[14px]" style={{ color: "#8a6a1f" }}>Pedido {orderCode.current}</p>
+                <h3 className="font-display text-[30px] font-semibold leading-tight pr-12" style={{ color: "var(--lv-wine)" }}>Tu recibo está listo</h3>
+
+                {/* El recibo sale de la "impresora" */}
+                <div className="mt-5 overflow-hidden rounded-[18px]" style={{ background: "var(--lv-cream-2)" }}>
+                  <motion.img src={receiptImg} alt="Recibo de pedido" className="w-full"
+                    initial={{ y: "-60%" }} animate={{ y: 0 }} transition={{ duration: 1.1, ease: EASE }} />
                 </div>
 
-                {/* Receipt preview */}
-                <div className="w-full rounded-2xl overflow-hidden"
-                  style={{ border: "1px solid rgba(212,175,55,0.25)", boxShadow: "0 12px 40px rgba(165,0,89,0.1)" }}>
-                  <img src={receiptImg} alt="Recibo de pedido" className="w-full" />
-                </div>
-
-                <p className="font-inter text-[10px] text-center leading-relaxed" style={{ color: "rgba(165,0,89,0.45)" }}>
-                  Al confirmar, la imagen se descargará automáticamente.
-                  Luego solo adjúntala en WhatsApp desde tu galería.
+                <p className="font-inter text-[15px] leading-relaxed mt-4" style={{ color: "var(--lv-ink)" }}>
+                  Al tocar el botón se descarga la imagen y se abre WhatsApp. Solo adjúntala desde tu galería y envíala.
                 </p>
 
-                <button
-                  onClick={handleSend}
-                  className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-inter text-sm font-semibold tracking-[0.1em] uppercase transition-all duration-500 hover:scale-[1.02] hover:shadow-xl"
-                  style={{ background: "linear-gradient(135deg, #25d366, #1da851)", color: "#fff" }}
-                >
-                  <Download size={16} />
-                  Descargar y enviar por WhatsApp
+                <button onClick={handleSend}
+                  className="btn-press mt-5 w-full flex items-center justify-center gap-2 py-4 rounded-full font-inter text-[15px] font-semibold"
+                  style={{ background: "#25d366", color: "#fff" }}>
+                  <Download size={17} /> Descargar y enviar por WhatsApp
                 </button>
-
-                <button
-                  onClick={() => setStep("form")}
-                  className="font-inter text-[11px] tracking-[0.15em] uppercase transition-opacity hover:opacity-70"
-                  style={{ color: "rgba(165,0,89,0.4)" }}
-                >
-                  ← Editar pedido
+                <button onClick={() => setStep("form")} className="nav-link mx-auto block mt-4 font-inter text-[15px] font-medium" style={{ color: "var(--lv-wine)" }}>
+                  Editar pedido
                 </button>
               </motion.div>
             )}
@@ -305,11 +233,27 @@ export default function OrderForm({ product, subcategory, options = {}, portions
 function Field({ label, children }) {
   return (
     <div>
-      <label className="font-inter text-[10px] tracking-[0.2em] uppercase font-medium block mb-1.5"
-        style={{ color: "rgba(165,0,89,0.5)" }}>
-        {label}
-      </label>
+      <p className="font-display text-[19px] mb-2.5" style={{ color: "var(--lv-wine)" }}>{label}</p>
       {children}
+    </div>
+  );
+}
+
+// Opciones para tocar con el pulgar (una o varias)
+function ChipGroup({ items, value, onChange, multi }) {
+  return (
+    <div className="flex flex-wrap gap-2" role={multi ? "group" : "radiogroup"}>
+      {items.map((name) => {
+        const on = multi ? value.includes(name) : value === name;
+        return (
+          <button key={name} type="button" role={multi ? "checkbox" : "radio"} aria-checked={on}
+            onClick={() => onChange(name)}
+            className="btn-press px-4 py-2.5 rounded-full font-inter text-[14px] text-left"
+            style={{ background: on ? "var(--lv-wine)" : "var(--lv-cream-2)", color: on ? "var(--lv-cream)" : "var(--lv-ink)", transition: "background .25s, color .25s" }}>
+            {name}
+          </button>
+        );
+      })}
     </div>
   );
 }

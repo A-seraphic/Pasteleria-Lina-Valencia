@@ -70,8 +70,8 @@ export default function CakeARModal({ portions, initialPortionId, title, onClose
   return createPortal(
     <motion.div
       data-scroll-lock
-      className="fixed inset-0 z-[80] flex flex-col font-inter"
-      style={{ background: cameraMode ? "#000" : "radial-gradient(120% 80% at 50% 30%, #fff7fa 0%, #f6e7ee 55%, #efdbe5 100%)" }}
+      className="fixed inset-0 z-[90] flex flex-col font-inter"
+      style={{ background: cameraMode ? "#000" : "var(--lv-wine-deep)" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -84,10 +84,10 @@ export default function CakeARModal({ portions, initialPortionId, title, onClose
       {/* Barra superior */}
       <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),16px)] pb-2">
         <div className="min-w-0">
-          <p className="text-[10px] tracking-[0.3em] uppercase font-semibold" style={{ color: "#d4af37" }}>
+          <p className="text-[14px]" style={{ color: "var(--lv-gold-soft)" }}>
             {cameraMode ? "Cámara" : "Tamaño real en 3D"}
           </p>
-          <h3 className="font-playfair text-xl font-semibold truncate" style={{ color: cameraMode ? "#fff" : "#a50059" }}>
+          <h3 className="font-display text-[26px] font-semibold truncate" style={{ color: "var(--lv-cream)" }}>
             {title || `Torta ${portion?.label ?? ""}`}
           </h3>
         </div>
@@ -123,7 +123,7 @@ export default function CakeARModal({ portions, initialPortionId, title, onClose
       {/* Controles */}
       <div
         className="relative z-10 rounded-t-[28px] px-4 pt-4 pb-[max(env(safe-area-inset-bottom),16px)]"
-        style={{ background: "rgba(253,250,245,0.94)", backdropFilter: "blur(24px)", boxShadow: "0 -12px 40px rgba(165,0,89,0.10)" }}
+        style={{ background: "var(--lv-cream)" }}
       >
         <div ref={chipsRef} className="flex gap-2 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-1 no-scrollbar">
           {portions.map((p) => {
@@ -135,9 +135,9 @@ export default function CakeARModal({ portions, initialPortionId, title, onClose
                 aria-pressed={active}
                 className="snap-start shrink-0 rounded-2xl px-4 py-2.5 text-left transition-all active:scale-95"
                 style={{
-                  background: active ? "linear-gradient(135deg,#a50059,#7d0044)" : "rgba(212,175,55,0.08)",
+                  background: active ? "var(--lv-wine)" : "var(--lv-cream-2)",
                   color: active ? "#fdfaf5" : "#a50059",
-                  border: active ? "1px solid transparent" : "1px solid rgba(212,175,55,0.2)",
+                  
                 }}
               >
                 <span className="block text-[12px] font-semibold">{p.label}</span>
@@ -175,14 +175,14 @@ export default function CakeARModal({ portions, initialPortionId, title, onClose
         <div className="flex gap-2 mt-4">
           {cameraMode ? (
             <button onClick={stopCamera}
-              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-[13px] font-semibold tracking-wide uppercase active:scale-[0.98] transition-transform"
+              className="btn-press flex-1 flex items-center justify-center gap-2 py-4 rounded-full text-[15px] font-semibold"
               style={{ background: "rgba(165,0,89,0.08)", color: "#a50059" }}>
               <RotateCcw size={16} /> Volver al 3D
             </button>
           ) : (
             <button onClick={openCamera}
-              className="ar-cta flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-[13px] font-semibold tracking-wide uppercase active:scale-[0.98] transition-transform"
-              style={{ background: "linear-gradient(135deg,#a50059,#7d0044)", color: "#fdfaf5", boxShadow: "0 12px 30px rgba(165,0,89,0.3)" }}>
+              className="btn-press ar-cta flex-1 flex items-center justify-center gap-2 py-4 rounded-full text-[15px] font-semibold"
+              style={{ background: "var(--lv-wine)", color: "#fdfaf5" }}>
               <Camera size={17} /> {canAR === false ? "Abrir cámara" : "Ver en mi espacio"}
             </button>
           )}

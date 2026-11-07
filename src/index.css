@@ -145,3 +145,42 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .text-shimmer, .marquee-track { animation: none; }
 }
+
+/* ── Tokens de la marca ───────────────────────────────────────────── */
+:root {
+  --lv-cream: #fdfaf5;
+  --lv-cream-2: #f6ece4;
+  --lv-blush: #f3dde6;
+  --lv-wine: #a50059;
+  --lv-wine-deep: #5c0032;
+  --lv-ink: #4a0028;
+  --lv-gold: #d4af37;
+  --lv-gold-soft: #f3dc9a;
+}
+body { background: var(--lv-cream); }
+.font-display { font-family: var(--font-playfair); letter-spacing: -0.025em; }
+
+/* Subrayado que crece en los enlaces del menú */
+.nav-link { position: relative; padding: 6px 0; }
+.nav-link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px;
+  background: var(--lv-gold); transform: scaleX(0); transform-origin: right; transition: transform .45s cubic-bezier(.22,1,.36,1);
+}
+.nav-link:hover::after, .nav-link:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+
+/* Respuesta al toque en botones */
+.btn-press { transition: transform .2s cubic-bezier(.22,1,.36,1), filter .2s; }
+.btn-press:hover { filter: brightness(1.06); }
+.btn-press:active { transform: scale(0.96); }
+:focus-visible { outline: 2px solid var(--lv-gold); outline-offset: 3px; }
+
+/* Papel del recibo con borde dentado abajo */
+.receipt-paper {
+  background: #fffdf8;
+  --zig: 10px;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--zig) * 2) var(--zig) repeat-x,
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--zig) + 1px) no-repeat;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--zig) * 2) var(--zig) repeat-x,
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--zig) + 1px) no-repeat;
+  filter: drop-shadow(0 18px 24px rgba(92, 0, 50, 0.16));
+}

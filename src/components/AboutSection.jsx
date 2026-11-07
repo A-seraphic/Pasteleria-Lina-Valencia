@@ -51,7 +51,7 @@ export default function AboutSection() {
           {/* Reveal mask that slides away */}
           <motion.div
             className="absolute inset-0 z-10"
-            style={{ background: "hsl(37 60% 97%)", transformOrigin: "left" }}
+            style={{ background: "var(--lv-cream)", transformOrigin: "left" }}
             initial={{ scaleX: 1 }}
             animate={visible ? { scaleX: 0 } : {}}
             transition={{ duration: 1.1, ease: EASE, delay: 0.15 }}
@@ -59,7 +59,7 @@ export default function AboutSection() {
           {/* Soft edge gradient */}
           <div
             className="absolute inset-0 z-20 hidden md:block"
-            style={{ background: "linear-gradient(to right, transparent 70%, hsl(37 60% 97%) 100%)" }}
+            style={{ background: "linear-gradient(to right, transparent 70%, var(--lv-cream) 100%)" }}
           />
           {/* Gold accent bar */}
           <motion.div
@@ -74,23 +74,12 @@ export default function AboutSection() {
         {/* ── RIGHT: Text ── */}
         <div
           className="relative w-full md:w-[55%] flex items-center"
-          style={{ background: "hsl(37 60% 97%)" }}
+          style={{ background: "var(--lv-cream)" }}
         >
           <div className="px-6 md:px-16 lg:px-24 py-16 md:py-20 max-w-2xl">
-            {/* Label */}
-            <motion.span
-              className="font-inter text-xs tracking-[0.4em] uppercase font-medium block mb-5"
-              style={{ color: "#d4af37" }}
-              initial={{ opacity: 0, y: 14 }}
-              animate={visible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.65, ease: EASE, delay: 0.4 }}
-            >
-              Nuestra Historia
-            </motion.span>
-
             {/* Heading */}
             <motion.h2
-              className="font-playfair text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.1] mb-6"
+              className="font-display text-[44px] md:text-6xl lg:text-7xl font-semibold leading-[1] mb-6"
               style={{ color: "#a50059" }}
               initial={{ opacity: 0, y: 20 }}
               animate={visible ? { opacity: 1, y: 0 } : {}}
@@ -112,8 +101,8 @@ export default function AboutSection() {
 
             {/* Paragraph 1 */}
             <motion.p
-              className="font-inter text-sm md:text-base font-light leading-relaxed mb-5"
-              style={{ color: "rgba(165,0,89,0.55)" }}
+              className="font-inter text-[17px] md:text-[18px] leading-relaxed mb-5"
+              style={{ color: "var(--lv-ink)" }}
               initial={{ opacity: 0, y: 18 }}
               animate={visible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, ease: EASE, delay: 0.7 }}
@@ -125,8 +114,8 @@ export default function AboutSection() {
 
             {/* Paragraph 2 */}
             <motion.p
-              className="font-inter text-sm md:text-base font-light leading-relaxed mb-10"
-              style={{ color: "rgba(165,0,89,0.55)" }}
+              className="font-inter text-[17px] md:text-[18px] leading-relaxed mb-10"
+              style={{ color: "var(--lv-ink)" }}
               initial={{ opacity: 0, y: 18 }}
               animate={visible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, ease: EASE, delay: 0.82 }}

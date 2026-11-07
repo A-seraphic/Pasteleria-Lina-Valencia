@@ -17,8 +17,8 @@ export default function LoadingScreen({ onComplete }) {
       {isVisible && (
         <motion.div
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
-          style={{ background: "#fdfaf5" }}
-          exit={{ y: "-100%", opacity: 0 }}
+          style={{ background: "var(--lv-wine-deep)" }}
+          exit={{ y: "-100%" }}
           transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
         >
           <motion.div
@@ -28,16 +28,16 @@ export default function LoadingScreen({ onComplete }) {
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           >
             <span
-              className="font-playfair text-5xl md:text-6xl font-semibold tracking-tight"
-              style={{ color: "#a50059" }}
+              className="font-display text-5xl md:text-7xl font-semibold"
+              style={{ color: "var(--lv-cream)" }}
             >
               Lina Valencia
             </span>
             <span
-              className="font-inter text-sm md:text-base tracking-[0.35em] uppercase font-light"
-              style={{ color: "#d4af37" }}
+              className="font-inter text-[15px] md:text-[17px]"
+              style={{ color: "var(--lv-gold-soft)" }}
             >
-              Pastelería Artesanal
+              Pastelería de autor
             </span>
           </motion.div>
 

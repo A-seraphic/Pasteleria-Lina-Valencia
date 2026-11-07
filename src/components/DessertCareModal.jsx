@@ -61,7 +61,7 @@ export default function DessertCareModal({ product, onClose }) {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-[85] flex items-center justify-center p-4"
         style={{ background: "rgba(165,0,89,0.06)", backdropFilter: "blur(10px)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

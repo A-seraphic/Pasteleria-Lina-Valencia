@@ -19,7 +19,12 @@ export function ScrollProgress() {
 export function WhatsAppFab() {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > window.innerHeight * 0.7);
+    // Aparece tras el hero y se oculta al llegar al pie (que ya tiene su botón)
+    const onScroll = () => {
+      const y = window.scrollY;
+      const nearEnd = y > document.documentElement.scrollHeight - window.innerHeight * 1.9;
+      setShow(y > window.innerHeight * 0.7 && !nearEnd);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);

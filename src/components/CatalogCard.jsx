@@ -2,15 +2,15 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowUpRight, Box } from "lucide-react";
 
 /**
- * CatalogCard — tarjeta con inclinación 3D y brillo que sigue al puntero.
- * En pantallas táctiles no hay estados hover que se queden pegados.
+ * Tarjeta de categoría: foto protagonista con inclinación 3D y brillo que sigue al puntero.
+ * featured: la primera del catálogo, más grande y con su descripción.
  */
-export default function CatalogCard({ product, isHovered, isFaded, onHover, onLeave, onClick }) {
+export default function CatalogCard({ product, featured, onClick }) {
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
-  const rotateX = useSpring(useTransform(py, [0, 1], [7, -7]), { stiffness: 180, damping: 18 });
-  const rotateY = useSpring(useTransform(px, [0, 1], [-9, 9]), { stiffness: 180, damping: 18 });
-  const glare = useTransform([px, py], ([x, y]) => `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.45), transparent 55%)`);
+  const rotateX = useSpring(useTransform(py, [0, 1], [6, -6]), { stiffness: 180, damping: 18 });
+  const rotateY = useSpring(useTransform(px, [0, 1], [-8, 8]), { stiffness: 180, damping: 18 });
+  const glare = useTransform([px, py], ([x, y]) => `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.4), transparent 50%)`);
   const has3D = product.subcategories?.some((s) => s.ar);
 
   const onMove = (e) => {
@@ -19,74 +19,49 @@ export default function CatalogCard({ product, isHovered, isFaded, onHover, onLe
     px.set((e.clientX - r.left) / r.width);
     py.set((e.clientY - r.top) / r.height);
   };
-  const onOut = () => { px.set(0.5); py.set(0.5); onLeave?.(); };
 
   return (
-    <div style={{ perspective: 900 }}>
+    <div style={{ perspective: 1000 }} className="h-full">
       <motion.button
         type="button"
-        className="catalog-card group relative w-full text-left rounded-[22px] md:rounded-3xl overflow-hidden"
-        style={{
-          rotateX, rotateY, transformStyle: "preserve-3d",
-          background: "rgba(253,250,245,0.78)",
-          backdropFilter: "blur(14px)",
-          border: "1px solid rgba(212,175,55,0.14)",
-          boxShadow: isHovered
-            ? "0 28px 60px -12px rgba(165,0,89,0.28), 0 8px 20px rgba(212,175,55,0.12)"
-            : "0 6px 22px rgba(165,0,89,0.07)",
-          opacity: isFaded ? 0.6 : 1,
-          transition: "box-shadow .4s ease, opacity .35s ease",
-        }}
-        onPointerMove={onMove}
-        onPointerEnter={(e) => e.pointerType === "mouse" && onHover?.()}
-        onPointerLeave={onOut}
-        whileTap={{ scale: 0.97 }}
         onClick={onClick}
+        onPointerMove={onMove}
+        onPointerLeave={() => { px.set(0.5); py.set(0.5); }}
+        whileTap={{ scale: 0.97 }}
         aria-label={`Ver ${product.name}`}
+        className="group relative w-full h-full flex flex-col text-left"
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
-        <div className="relative overflow-hidden aspect-square md:aspect-[5/4]">
-          <img
-            src={product.img}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 ease-out md:group-hover:scale-[1.08]"
-          />
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, transparent 50%, rgba(84,0,45,0.32))" }} />
-          <motion.div className="absolute inset-0 pointer-events-none hidden md:block opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: glare }} />
-
-          {product.tag && (
-            <span className="absolute top-2.5 left-2.5 px-2.5 py-[3px] rounded-full font-inter text-[9px] font-semibold tracking-[0.14em] uppercase"
-              style={{ background: "rgba(253,250,245,0.92)", color: "#b8912a", transform: "translateZ(30px)" }}>
-              {product.tag}
-            </span>
-          )}
+        <div className={`relative w-full overflow-hidden rounded-[22px] md:rounded-[28px] ${featured ? "aspect-[16/11] md:aspect-auto md:flex-1 md:min-h-[420px]" : "aspect-[4/5]"}`}
+          style={{ background: "var(--lv-blush)" }}>
+          <img src={product.img} alt="" loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(.22,1,.36,1)] md:group-hover:scale-[1.07]" />
+          <motion.div aria-hidden className="absolute inset-0 hidden md:block opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: glare }} />
           {has3D && (
-            <span className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center"
-              title="Disponible en 3D" style={{ background: "rgba(165,0,89,0.88)", color: "#fdfaf5" }}>
-              <Box size={13} />
+            <span className="absolute top-3 right-3 h-8 px-3 rounded-full flex items-center gap-1.5 font-inter text-[12px] font-semibold"
+              style={{ background: "var(--lv-cream)", color: "var(--lv-wine)", transform: "translateZ(30px)" }}>
+              <Box size={13} style={{ color: "var(--lv-gold)" }} /> 3D
             </span>
           )}
-          <span className="absolute bottom-2.5 left-3 font-inter text-[10px] tracking-[0.12em] uppercase text-white/90">
-            {product.subcategories?.length || 0} opciones
+          <span className="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-500 md:group-hover:rotate-45"
+            style={{ background: "var(--lv-wine)", color: "var(--lv-cream)", transform: "translateZ(40px)" }}>
+            <ArrowUpRight size={18} />
           </span>
         </div>
 
-        <div className="px-3 pt-2.5 pb-3 md:px-4 md:pt-3.5 md:pb-4" style={{ transform: "translateZ(20px)" }}>
-          <h3 className="font-playfair text-[15px] md:text-lg font-semibold leading-tight" style={{ color: "#a50059" }}>
+        <div className="pt-3 md:pt-4 px-1" style={{ transform: "translateZ(20px)" }}>
+          <h3 className={`font-display font-semibold leading-tight ${featured ? "text-[28px] md:text-[40px]" : "text-[19px] md:text-[24px]"}`} style={{ color: "var(--lv-wine)" }}>
             {product.name}
           </h3>
-          <p className="hidden md:block font-inter text-[11px] font-light italic mt-0.5" style={{ color: "#b8912a" }}>
-            {product.tagline}
+          {featured && product.shortDesc && (
+            <p className="font-inter text-[15px] mt-1.5 max-w-[42ch]" style={{ color: "var(--lv-ink)" }}>{product.shortDesc}</p>
+          )}
+          <p className="font-inter text-[14px] md:text-[15px] mt-1" style={{ color: "#8a6a1f" }}>
+            {product.price}
+            <span className="block md:inline md:before:content-['_·_'] text-[13px] md:text-[15px]" style={{ color: "rgba(74,0,40,0.55)" }}>
+              {product.subcategories?.length || 0} diseños
+            </span>
           </p>
-          <div className="flex items-center justify-between mt-2 md:mt-3 gap-2">
-            <span className="font-inter text-[11px] md:text-xs font-semibold truncate" style={{ color: "#b8912a" }}>
-              {product.price}
-            </span>
-            <span className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full flex items-center justify-center transition-colors md:group-hover:bg-[#a50059] md:group-hover:text-[#fdfaf5]"
-              style={{ background: "rgba(212,175,55,0.14)", color: "#a50059" }}>
-              <ArrowUpRight size={15} />
-            </span>
-          </div>
         </div>
       </motion.button>
     </div>

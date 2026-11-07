@@ -115,7 +115,7 @@ export default function VideoRevealSection() {
       ref={sectionRef}
       id="video-reveal-container"
       className="relative overflow-hidden"
-      style={{ height: "100vh" }}>
+      style={{ height: "100svh" }}>
       
       {/* ── Masked video layer ────────────────────────────────────────────── */}
       <div
@@ -160,7 +160,7 @@ export default function VideoRevealSection() {
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse 80% 80% at 50% 50%, #f5e8ef 0%, #ede0e8 100%)",
+          background: "var(--lv-blush)",
           zIndex: -1
         }} />
       
@@ -168,29 +168,16 @@ export default function VideoRevealSection() {
       {/* ── Centered text ────────────────────────────────────────────────── */}
       <div className="absolute inset-0 flex items-center justify-center z-10 px-6 pointer-events-none">
         <div ref={textRef} className="text-center" style={{ willChange: "transform, opacity" }}>
-          <span
-            className="font-inter text-xs tracking-[0.45em] uppercase font-medium block mb-4"
-            style={{ color: "rgba(212,175,55,0.9)", textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}>
-            
-            Lina Valencia Pastelería
-          </span>
           <h2
-            className="font-playfair text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.1]"
-            style={{
-              color: "#fdfaf5",
-              textShadow: "0 4px 32px rgba(0,0,0,0.5), 0 1px 8px rgba(0,0,0,0.3)"
-            }}>
-            
-            La magia de lo
+            className="font-display text-[48px] md:text-[96px] font-semibold leading-[0.95]"
+            style={{ color: "#fdfaf5", textShadow: "0 4px 32px rgba(0,0,0,0.45)" }}>
+            Así nace
             <br />
-            <span className="italic font-normal" style={{ color: "#d4af37" }}>artesanal</span>
-            <br />
-            en cada detalle
+            cada torta
           </h2>
-          <div
-            className="w-16 h-[1px] mx-auto mt-6"
-            style={{ background: "linear-gradient(to right, transparent, rgba(212,175,55,0.8), transparent)" }} />
-          
+          <p className="font-inter text-[17px] md:text-[19px] mt-5 max-w-[30ch] mx-auto" style={{ color: "rgba(253,250,245,0.9)", textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}>
+            Horneada a pedido y decorada a mano en el taller de Lina.
+          </p>
         </div>
       </div>
     </section>);

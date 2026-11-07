@@ -94,6 +94,8 @@ export function buildCakeScene({ diameter = 20, height = 10, tiers = 1, slices =
       const isPulled = pulled && ti === 0 && i === 0 && n > 1;
       const push = isPulled ? r * 0.32 : gap;
       slice.position.set(Math.cos(mid) * push, isPulled ? cm(0.6) : 0, -Math.sin(mid) * push);
+      // El escenario animado usa estas posiciones para deslizar la porción hacia afuera
+      if (isPulled) slice.userData.pulled = { from: [Math.cos(mid) * gap, 0, -Math.sin(mid) * gap], to: slice.position.toArray() };
       tierGroup.add(slice);
     }
 
@@ -123,6 +125,7 @@ export function buildCakeScene({ diameter = 20, height = 10, tiers = 1, slices =
     root.add(tierGroup);
   });
 
+  root.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   const scene = new THREE.Scene();
   scene.add(root);
   return scene;
@@ -139,4 +142,27 @@ export async function buildCakeModelUrl(params) {
   })();
   cache.set(key, promise);
   return promise;
+}
+
+// Taza de café de referencia (8 cm × 9,5 cm) para comparar el tamaño real
+export function buildReferenceCup() {
+  const g = new THREE.Group();
+  const white = mat("#ffffff", { roughness: 0.25 });
+  const coffee = mat("#3b2416", { roughness: 0.2 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(cm(4), cm(3.6), cm(9.5), 40, 1, true), white);
+  body.material = white.clone();
+  body.material.side = THREE.DoubleSide;
+  body.position.y = cm(4.75);
+  const base = new THREE.Mesh(new THREE.CircleGeometry(cm(3.6), 40), white);
+  base.rotation.x = -Math.PI / 2;
+  base.position.y = cm(0.1);
+  const drink = new THREE.Mesh(new THREE.CircleGeometry(cm(3.85), 40), coffee);
+  drink.rotation.x = -Math.PI / 2;
+  drink.position.y = cm(8.4);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(cm(2.2), cm(0.55), 12, 24, Math.PI * 1.2), white);
+  handle.position.set(cm(4.1), cm(5), 0);
+  handle.rotation.z = -Math.PI * 0.6;
+  g.add(body, base, drink, handle);
+  g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+  return g;
 }
