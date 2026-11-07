@@ -11,40 +11,40 @@ gsap.registerPlugin(ScrollTrigger, Draggable);
 
 const CARDS = [
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/b087a2735_ChatGPTImage28jun202605_47_52pm.png",
+    img: "/img/chatgptimage28jun202605-47-52pm.webp",
     label: "Feliz 90 Años",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/27bbac698_ChatGPTImage28jun202605_48_45pm.png",
+    img: "/img/chatgptimage28jun202605-48-45pm.webp",
     label: "Dani · Mariposas",
   },
-  { img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/243a59231_ChatGPTImage28jun202605_48_56pm.png", label: "Mis 15" },
+  { img: "/img/chatgptimage28jun202605-48-56pm.webp", label: "Mis 15" },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/abd51d06c_ChatGPTImage28jun202605_49_05pm.png",
+    img: "/img/chatgptimage28jun202605-49-05pm.webp",
     label: "Samuel 12 · Fútbol",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/50e1a3a21_ChatGPTImage28jun202605_49_20pm.png",
+    img: "/img/chatgptimage28jun202605-49-20pm.webp",
     label: "Powerpuff Girls",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/e445ddd13_ChatGPTImage28jun202605_49_31pm.png",
+    img: "/img/chatgptimage28jun202605-49-31pm.webp",
     label: "Graduación Medicina",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/a973fcbbd_ChatGPTImage28jun202605_49_39pm.png",
+    img: "/img/chatgptimage28jun202605-49-39pm.webp",
     label: "Paw Patrol",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/c814b2678_ChatGPTImage28jun202605_49_46pm.png",
+    img: "/img/chatgptimage28jun202605-49-46pm.webp",
     label: "Naked Cake Floral",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/6fffd31a0_ChatGPTImage28jun202605_49_53pm.png",
+    img: "/img/chatgptimage28jun202605-49-53pm.webp",
     label: "San Pedro Huila",
   },
   {
-    img: "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/78c2f2fd8_ChatGPTImage28jun202605_50_05pm.png",
+    img: "/img/chatgptimage28jun202605-50-05pm.webp",
     label: "Happy Birthday Art",
   },
 ];

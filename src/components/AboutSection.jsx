@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 
 const EASE = [0.22, 1, 0.36, 1];
 
-const ABOUT_IMG_DESKTOP = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/b23739b26_WhatsAppImage2026-09-10at65525PM.jpeg";
-const ABOUT_IMG_MOBILE = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/45544a097_ChatGPTImage10sept202610_09_38pm.png";
+const ABOUT_IMG_DESKTOP = "/img/whatsappimage2026-09-10at65525pm.webp";
+const ABOUT_IMG_MOBILE = "/img/chatgptimage10sept202610-09-38pm.webp";
 
 export default function AboutSection() {
   const sectionRef = useRef(null);

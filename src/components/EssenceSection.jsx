@@ -2,23 +2,21 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Reveal, RevealItem, SplitTitle } from "./fx/Reveal";
 
-const BASE = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/";
-
 const essenceItems = [
   {
     title: "Hecho con amor",
     desc: "Cada creación nace del detalle y del cariño por lo artesanal. Nuestros postres llevan el corazón de Lina en cada capa.",
-    img: `${BASE}13e00a964_icon_personalizadas.png`,
+    img: "/img/icon-personalizadas.webp",
   },
   {
     title: "Ingredientes selectos",
     desc: "Vainilla de Madagascar, chocolate belga y frutas de temporada elegidas a mano, sin atajos ni premezclas.",
-    img: `${BASE}0ef810e6b_icon_ponques.png`,
+    img: "/img/icon-ponques.webp",
   },
   {
     title: "Tradición renovada",
     desc: "Recetas heredadas con técnicas de repostería francesa: sabores que recuerdan a casa y sorprenden en la mesa.",
-    img: `${BASE}7c3e75a0b_icon_postres.png`,
+    img: "/img/icon-postres.webp",
   },
 ];
 

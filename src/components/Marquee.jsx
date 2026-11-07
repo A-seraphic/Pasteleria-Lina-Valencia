@@ -18,7 +18,7 @@ export default function Marquee() {
   const row = [...categories, ...categories];
 
   return (
-    <div className="relative z-0 pt-16 md:pt-24 pb-8 md:pb-12 overflow-hidden">
+    <div className="relative z-0 pt-24 md:pt-28 pb-8 md:pb-12 overflow-hidden">
       <motion.div className="lace-band" style={{ skewY: skew }}>
         <div aria-hidden className="pearl-row" />
         <motion.div style={{ x }} className="py-3 md:py-4">

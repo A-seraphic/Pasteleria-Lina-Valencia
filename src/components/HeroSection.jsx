@@ -7,8 +7,8 @@ import { BRAND_ICONS } from "./fx/BrandIcons";
 import { scrollToId, whatsappUrl } from "@/data/site";
 import { usePublicCatalog } from "@/data/catalogStore";
 
-const HERO_IMG = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/b8c1349ab_generated_82178631.png";
-const SIDE_IMG = "https://media.base44.com/images/public/69f9758f7d1c8f8af9a6884c/c814b2678_ChatGPTImage28jun202605_49_46pm.png";
+const HERO_IMG = "/img/generated-82178631.webp";
+const SIDE_IMG = "/img/chatgptimage28jun202605-49-46pm.webp";
 const EASE = [0.22, 1, 0.36, 1];
 const SPRINKLES = ["#e91e8c", "#f8bbd0", "#d4af37", "#ffffff", "#a50059"];
 
@@ -256,9 +256,9 @@ export default function HeroSection({ ready = true }) {
       {/* Glaseado que gotea sobre la siguiente sección */}
       <Drips
         color="var(--lv-rose-soft)"
-        count={18}
+        shade="#f4b3cc"
         seed={3}
-        height={110}
+        height={124}
         play={ready}
         delay={0.4}
         className="absolute left-0 right-0 top-full -mt-[2px] z-10 pointer-events-none"
