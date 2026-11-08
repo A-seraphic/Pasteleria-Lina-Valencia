@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { Box } from "lucide-react";
 import GoldDust from "./fx/GoldDust";
-import Drips from "./fx/Drips";
+import Glaze from "./fx/Glaze";
 import { BRAND_ICONS } from "./fx/BrandIcons";
 import { scrollToId, whatsappUrl } from "@/data/site";
 import { usePublicCatalog } from "@/data/catalogStore";
@@ -260,14 +260,18 @@ export default function HeroSection({ ready = true }) {
       </div>
 
       {/* Glaseado que gotea sobre la siguiente sección */}
-      <Drips
-        color="var(--lv-rose-soft)"
-        shade="#f4b3cc"
+      {/* Glaseado de fresa que se vierte sobre el borde del inicio */}
+      <Glaze
+        color="#f48fb1"
+        shade="#de5d97"
+        band={32}
+        lit
+        sprinkles
         seed={3}
-        height={124}
+        height={158}
         play={ready}
-        delay={0.4}
-        className="absolute left-0 right-0 top-full -mt-[2px] z-10 pointer-events-none"
+        delay={0.35}
+        className="absolute left-0 right-0 top-full -mt-[30px] z-10"
       />
     </section>
   );

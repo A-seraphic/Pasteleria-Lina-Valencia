@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Drips from "./fx/Drips";
+import Glaze from "./fx/Glaze";
 import { BRAND_ICONS } from "./fx/BrandIcons";
 
 const EASE = [0.76, 0, 0.24, 1];
@@ -46,8 +46,8 @@ export default function LoadingScreen({ onComplete }) {
           <div className="relative h-full flex flex-col items-center justify-center overflow-hidden" style={{ background: "var(--lv-rose-soft)" }}>
             {/* Glaseado que se vierte desde arriba mientras carga */}
             <div className="absolute top-0 inset-x-0">
-              <div className="h-[5svh]" style={{ background: "var(--lv-rose)" }} />
-              <Drips color="var(--lv-rose)" shade="#ec8fb5" seed={5} height={full ? 230 : 150} delay={0.1} falling={full} />
+              <div className="h-[4svh]" style={{ background: "#f48fb1" }} />
+              <Glaze color="#f48fb1" shade="#de5d97" band={30} lit sprinkles seed={5} height={full ? 260 : 170} delay={0.05} falling={full} />
             </div>
             {/* Íconos de la marca orbitando */}
             {full && (
@@ -86,7 +86,7 @@ export default function LoadingScreen({ onComplete }) {
           </div>
 
           {/* Gotas de glaseado que cuelgan del borde y "caen" al subir la cortina */}
-          <Drips color="var(--lv-rose-soft)" shade="#f4b3cc" seed={11} height={170} delay={0.6} falling={false} className="absolute left-0 right-0 top-full -mt-[2px]" />
+          <Glaze color="#fde4ee" shade="#f7c4d8" lit={false} band={16} seed={11} height={170} delay={0.5} falling={false} shadowColor="#c2185b" className="absolute left-0 right-0 top-full -mt-[2px]" />
         </motion.div>
       )}
     </AnimatePresence>
