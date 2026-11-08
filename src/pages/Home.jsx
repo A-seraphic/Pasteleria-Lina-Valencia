@@ -13,6 +13,7 @@ import ContactSection from "../components/ContactSection";
 import FooterSection from "../components/FooterSection";
 import Marquee from "../components/Marquee";
 import { ScrollProgress, WhatsAppFab } from "../components/ScrollExtras";
+import CheckoutSheet, { CartButton } from "../components/CheckoutSheet";
 import useSmoothScroll from "../hooks/useSmoothScroll";
 
 // Orden: qué hacen → el catálogo → lo personalizado → el tamaño → cómo pedir → quiénes son → contacto
@@ -32,6 +33,8 @@ export default function Home() {
         <ScrollProgress />
         <CapsuleNavbar />
         <WhatsAppFab />
+        <CartButton />
+        <CheckoutSheet />
         <main className="relative z-10">
           <HeroSection ready={!isLoading} />
           <Marquee />

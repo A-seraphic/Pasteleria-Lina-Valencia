@@ -1,10 +1,9 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download, Loader2, AlertCircle } from "lucide-react";
-import ReceiptTemplate from "./ReceiptTemplate";
+import { X, AlertCircle, ShoppingBag } from "lucide-react";
 import useScrollLock from "@/hooks/useScrollLock";
-import { whatsappUrl } from "@/data/site";
 import { estimateTotal } from "@/data/catalogStore";
+import { useCart } from "@/data/cart";
 import { DEFAULT_RECEIPT, formatCOP } from "@/data/defaults";
 
 const EASE = [0.22, 1, 0.36, 1];
@@ -16,21 +15,9 @@ const inputStyle = {
 
 const NONE = "Por definir";
 
-function generateOrderCode(prefix) {
-  const year = new Date().getFullYear();
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return `#${prefix || "LV"}-${year}-${num}`;
-}
-
-// Fecha mínima del evento según los días de anticipación del producto (formato yyyy-mm-dd)
-function minDate(days) {
-  const d = new Date();
-  d.setDate(d.getDate() + (Number(days) || 0));
-  return d.toISOString().slice(0, 10);
-}
-
 /**
- * Formulario de pedido. Todo lo que pregunta sale del panel:
+ * Formulario de personalización. Agrega el producto a "Mi pedido" (la fecha, las notas
+ * y el recibo se completan en la hoja del pedido). Todo lo que pregunta sale del panel:
  * - groups: especializaciones del producto [{ group, options }] (una o varias, obligatorias o no)
  * - portions: tamaños disponibles (con su valor extra)
  * - subcategory.customFields: preguntas propias del producto
@@ -48,17 +35,11 @@ export default function OrderForm({ product, subcategory, groups = [], portions 
   );
   const [portionId, setPortionId] = useState(null);
   const [answers, setAnswers] = useState({});
-  const [fecha, setFecha] = useState("");
-  const [detalles, setDetalles] = useState("");
   const [errors, setErrors] = useState([]);
-
-  const [step, setStep] = useState("form"); // "form" | "generating" | "preview"
-  const [receiptImg, setReceiptImg] = useState(null);
-  const orderCode = useRef(generateOrderCode(receipt.codePrefix));
+  const cart = useCart();
 
   const fields = subcategory?.customFields || [];
   const leadDays = Number(subcategory?.leadDays) || 0;
-  const earliest = minDate(leadDays);
   const portion = portions.find((p) => p.id === portionId);
 
   // Opciones elegidas (objetos con su precio) y filas del recibo por especialización
@@ -83,10 +64,6 @@ export default function OrderForm({ product, subcategory, groups = [], portions 
   const total = estimateTotal(subcategory, portion, chosen);
   const answerRows = fields.map((f) => ({ label: f.label, value: (answers[f.label] || "").trim() })).filter((a) => a.value);
 
-  const receiptData = {
-    product, design, rows, answers: answerRows, fecha, detalles, total,
-    note: subcategory?.receiptNote, orderCode: orderCode.current, receipt,
-  };
 
   const toggle = (group, name) =>
     setSel((s) => {
@@ -104,53 +81,30 @@ export default function OrderForm({ product, subcategory, groups = [], portions 
     });
     if (portions.length && !portion) missing.push("Tamaño");
     fields.forEach((f) => { if (f.required && !(answers[f.label] || "").trim()) missing.push(f.label); });
-    if (fecha && fecha < earliest) missing.push(`Fecha (mínimo ${leadDays} días de anticipación)`);
     setErrors(missing);
     return missing.length === 0;
   };
 
-  const handleConfirm = async () => {
+  // Agrega el producto configurado a "Mi pedido" y abre el pedido
+  const addToOrder = () => {
     if (!validate()) return;
-    setStep("generating");
-    try {
-      const html2canvas = (await import("html2canvas")).default;
-      const el = document.getElementById("receipt-template-node");
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#fdfaf5", logging: false });
-      setReceiptImg(canvas.toDataURL("image/png"));
-      setStep("preview");
-    } catch (err) {
-      console.error("No se pudo generar el recibo", err);
-      setStep("form");
-    }
-  };
-
-  const handleSend = () => {
-    const link = document.createElement("a");
-    link.download = `recibo-${orderCode.current.replace("#", "")}.png`;
-    link.href = receiptImg;
-    link.click();
-
-    const lines = [
-      receipt.whatsappIntro,
-      "",
-      `*Pedido ${orderCode.current}*`,
-      `📦 ${product.name} — ${design}`,
-      ...rows.map((r) => `🍰 ${r.label}: ${r.value}${receipt.showPrices && r.price ? ` (+${formatCOP(r.price)})` : ""}`),
-      ...answerRows.map((a) => `✏️ ${a.label}: ${a.value}`),
-      ...(receipt.showEventDate ? [`📅 Evento: ${fecha || "Por definir"}`] : []),
-      ...(receipt.showNotes && detalles ? [`📝 Notas: ${detalles}`] : []),
-      ...(receipt.showTotal && total ? [`💰 Total estimado: ${formatCOP(total)}`] : [`💰 Precio de referencia: ${subcategory?.price}`]),
-      "",
-      "_(Adjunto la imagen del recibo desde mi galería)_",
-    ];
-    setTimeout(() => window.open(whatsappUrl(lines.join("\n")), "_blank"), 400);
+    cart.add({
+      category: product.name,
+      design,
+      img: product.subcategories?.find((s) => s.name === design)?.img || subcategory?.img,
+      rows,
+      answers: answerRows,
+      note: subcategory?.receiptNote || "",
+      total,
+      priceText: subcategory?.price || "",
+      leadDays,
+    });
+    onClose();
+    setTimeout(() => cart.setOpen(true), 250);
   };
 
   return (
     <>
-      {/* Recibo fuera de la vista: html2canvas lo convierte en imagen */}
-      <ReceiptTemplate id="receipt-template-node" data={receiptData} />
-
       <AnimatePresence>
         <motion.div
           data-scroll-lock
@@ -175,9 +129,7 @@ export default function OrderForm({ product, subcategory, groups = [], portions 
               <X size={17} />
             </button>
 
-            {/* ── FORMULARIO ─────────────────────────────────────────────── */}
-            {step === "form" && (
-              <>
+            <>
                 <div className="pr-12">
                   <p className="font-inter text-[14px]" style={{ color: "#8a6a1f" }}>{product.name}</p>
                   <h3 className="font-display text-[30px] font-semibold leading-tight" style={{ color: "var(--lv-wine)" }}>
@@ -228,21 +180,6 @@ export default function OrderForm({ product, subcategory, groups = [], portions 
                     </Field>
                   ))}
 
-                  {receipt.showEventDate && (
-                    <Field label="Fecha del evento">
-                      <input type="date" value={fecha} min={earliest} onChange={(e) => setFecha(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl font-inter text-base outline-none"
-                        style={{ ...inputStyle, colorScheme: "light" }} />
-                    </Field>
-                  )}
-
-                  {receipt.showNotes && (
-                    <Field label="Mensaje o cambios especiales">
-                      <textarea rows={3} placeholder="Ej: sin gluten, colores, alergias…"
-                        value={detalles} onChange={(e) => setDetalles(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl font-inter text-base outline-none resize-none" style={inputStyle} />
-                    </Field>
-                  )}
                 </div>
 
                 <div className="sticky bottom-0 -mx-5 sm:-mx-8 mt-6 px-5 sm:px-8 pt-3 pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-8" style={{ background: "var(--lv-cream)" }}>
@@ -263,46 +200,19 @@ export default function OrderForm({ product, subcategory, groups = [], portions 
                       {receipt.showTotal && total ? formatCOP(total) : subcategory?.price}
                     </motion.span>
                   </div>
-                  <button onClick={handleConfirm}
+                  <button onClick={addToOrder}
                     className="btn-press w-full flex items-center justify-center gap-2 py-4 rounded-full font-inter text-[15px] font-semibold"
                     style={{ background: "var(--lv-wine)", color: "var(--lv-cream)" }}>
-                    Generar mi recibo
+                    <ShoppingBag size={17} /> Agregar a mi pedido
                   </button>
+                  {cart.count > 0 && (
+                    <p className="text-center font-inter text-[13px] mt-2" style={{ color: "rgba(74,0,40,0.6)" }}>
+                      Ya tienes {cart.count} {cart.count === 1 ? "producto" : "productos"} en tu pedido
+                    </p>
+                  )}
                 </div>
               </>
-            )}
 
-            {/* ── IMPRIMIENDO ─────────────────────────────────────────────── */}
-            {step === "generating" && (
-              <div className="flex flex-col items-center justify-center py-20 gap-5">
-                <Loader2 size={36} className="animate-spin" style={{ color: "var(--lv-gold)" }} />
-                <p className="font-display text-[22px]" style={{ color: "var(--lv-wine)" }}>Imprimiendo tu recibo…</p>
-              </div>
-            )}
-
-            {/* ── RECIBO LISTO ────────────────────────────────────────────── */}
-            {step === "preview" && receiptImg && (
-              <motion.div className="pb-[max(env(safe-area-inset-bottom),16px)] sm:pb-8"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }}>
-                <p className="font-inter text-[14px]" style={{ color: "#8a6a1f" }}>Pedido {orderCode.current}</p>
-                <h3 className="font-display text-[30px] font-semibold leading-tight pr-12" style={{ color: "var(--lv-wine)" }}>Tu recibo está listo</h3>
-                <div className="mt-5 overflow-hidden rounded-[18px]" style={{ background: "var(--lv-cream-2)" }}>
-                  <motion.img src={receiptImg} alt="Recibo de pedido" className="w-full"
-                    initial={{ y: "-60%" }} animate={{ y: 0 }} transition={{ duration: 1.1, ease: EASE }} />
-                </div>
-                <p className="font-inter text-[15px] leading-relaxed mt-4" style={{ color: "var(--lv-ink)" }}>
-                  Al tocar el botón se descarga la imagen y se abre WhatsApp. Solo adjúntala desde tu galería y envíala.
-                </p>
-                <button onClick={handleSend}
-                  className="btn-press mt-5 w-full flex items-center justify-center gap-2 py-4 rounded-full font-inter text-[15px] font-semibold"
-                  style={{ background: "#25d366", color: "#fff" }}>
-                  <Download size={17} /> Descargar y enviar por WhatsApp
-                </button>
-                <button onClick={() => setStep("form")} className="nav-link mx-auto block mt-4 font-inter text-[15px] font-medium" style={{ color: "var(--lv-wine)" }}>
-                  Editar pedido
-                </button>
-              </motion.div>
-            )}
           </motion.div>
         </motion.div>
       </AnimatePresence>

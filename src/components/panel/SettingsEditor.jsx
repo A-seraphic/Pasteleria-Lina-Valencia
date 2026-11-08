@@ -69,19 +69,27 @@ export function ReceiptSettings({ receipt, sample }) {
   };
 
   // Pedido de ejemplo para la vista previa, con un producto real del catálogo
+  const first = (sample?.basePrice || 145000) + 38000;
   const sampleData = {
-    product: { name: sample?.category || "Tortas Artesanales" },
-    design: sample?.name || "Chocolate Intenso",
-    rows: [
-      { label: "Bizcocho", value: "Chocolate negro 72%", price: 0 },
-      { label: "Relleno", value: "Ganache de chocolate", price: 8000 },
-      { label: "Tamaño", value: "Familiar · Ø 24 cm · 10–12 personas", price: 30000 },
+    items: [
+      {
+        uid: "a",
+        category: sample?.category || "Tortas Artesanales",
+        design: sample?.name || "Chocolate Intenso",
+        rows: [
+          { label: "Bizcocho", value: "Chocolate negro 72%", price: 0 },
+          { label: "Relleno", value: "Ganache de chocolate", price: 8000 },
+          { label: "Tamaño", value: "Familiar · Ø 24 cm · 10–12 personas", price: 30000 },
+        ],
+        answers: [{ label: "Nombre en la torta", value: "Feliz cumpleaños Valentina" }],
+        note: sample?.receiptNote || "",
+        total: first,
+      },
+      { uid: "b", category: "Cupcakes", design: "Jardín de Rosas", rows: [], answers: [], note: "", total: 30000 },
     ],
-    answers: [{ label: "Nombre en la torta", value: "Feliz cumpleaños Valentina" }],
     fecha: "2026-12-12",
     detalles: "Sin nueces, por favor",
-    note: sample?.receiptNote || "",
-    total: (sample?.basePrice || 145000) + 38000,
+    total: first + 30000,
     orderCode: `#${form.codePrefix || "LV"}-${new Date().getFullYear()}-0427`,
     receipt: form,
   };

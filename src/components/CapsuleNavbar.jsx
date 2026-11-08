@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Instagram } from "lucide-react";
 import { scrollToId, whatsappUrl, instagramUrl, SITE } from "@/data/site";
 import useScrollLock from "@/hooks/useScrollLock";
+import { useCart } from "@/data/cart";
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -78,6 +79,7 @@ export default function CapsuleNavbar() {
   };
 
   const solid = scrolled && !open;
+  const cart = useCart();
 
   return (
     <>
@@ -112,11 +114,20 @@ export default function CapsuleNavbar() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center px-5 py-2.5 rounded-full font-inter text-[14px] font-semibold btn-press"
-              style={{ background: "var(--lv-wine)", color: "var(--lv-cream)" }}>
-              Pedir
-            </a>
+            {cart.count > 0 ? (
+              <button onClick={() => cart.setOpen(true)}
+                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-inter text-[14px] font-semibold btn-press"
+                style={{ background: "var(--lv-wine)", color: "var(--lv-cream)" }}>
+                Mi pedido
+                <span className="min-w-5 h-5 px-1 rounded-full flex items-center justify-center text-[12px]" style={{ background: "var(--lv-gold)", color: "var(--lv-wine-deep)" }}>{cart.count}</span>
+              </button>
+            ) : (
+              <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer"
+                className="hidden sm:inline-flex items-center px-5 py-2.5 rounded-full font-inter text-[14px] font-semibold btn-press"
+                style={{ background: "var(--lv-wine)", color: "var(--lv-cream)" }}>
+                Pedir
+              </a>
+            )}
             <button
               className="lg:hidden relative w-11 h-11 rounded-full flex items-center justify-center"
               onClick={() => setOpen((o) => !o)}

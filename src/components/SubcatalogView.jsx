@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Sparkles, Camera, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Sparkles, Camera, ChevronLeft, ChevronRight, ShoppingBag, Share2, Check } from "lucide-react";
+import { useCart } from "@/data/cart";
 import OrderForm from "./OrderForm";
 import DessertCareModal from "./DessertCareModal";
 import CakeARModal from "./cake/CakeARModal";
@@ -14,12 +15,14 @@ const EASE = [0.22, 1, 0.36, 1];
  * Ficha de producto: fotos deslizables (scroll nativo con imán), datos y opciones,
  * y una barra fija abajo con el precio y la acción principal.
  */
-export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
+export default function SubcatalogView({ product, onBack, onIndexChange, initialSubIdx = 0 }) {
   const [subIdx, setSubIdx] = useState(initialSubIdx);
   const [orderFormOpen, setOrderFormOpen] = useState(false);
   const [careOpen, setCareOpen] = useState(false);
   const [arOpen, setArOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { options, portions, groups, receipt } = usePublicCatalog();
+  const cart = useCart();
   const trackRef = useRef(null);
   const scrollerRef = useRef(null);
   useScrollLock(true);
@@ -45,9 +48,24 @@ export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
   const onTrackScroll = () => {
     const el = trackRef.current;
     const i = Math.round(el.scrollLeft / el.clientWidth);
-    if (i !== subIdx) {
+    if (i !== subIdx && subs[i]) {
       setSubIdx(i);
+      onIndexChange?.(i);
       scrollerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Compartir el enlace directo a este diseño (WhatsApp, Instagram…) o copiarlo
+  const share = async () => {
+    const url = `${window.location.origin}/?c=${product.id}&p=${sub.id}`;
+    const data = { title: `${sub.name} · Lina Valencia`, text: `Mira esta creación de Lina Valencia: ${sub.name} (${sub.price})`, url };
+    try {
+      if (navigator.share) return await navigator.share(data);
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      // el cliente canceló el menú de compartir
     }
   };
 
@@ -93,6 +111,12 @@ export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
               className="btn-press absolute top-[max(env(safe-area-inset-top),16px)] left-4 w-11 h-11 rounded-full flex items-center justify-center"
               style={{ background: "var(--lv-cream)", color: "var(--lv-wine)" }}>
               <ArrowLeft size={19} />
+            </button>
+            <button onClick={share} aria-label={copied ? "Enlace copiado" : "Compartir este diseño"}
+              className="btn-press absolute top-[max(env(safe-area-inset-top),16px)] right-4 h-11 px-4 rounded-full flex items-center gap-2 font-inter text-[14px] font-semibold"
+              style={{ background: "var(--lv-cream)", color: "var(--lv-wine)" }}>
+              {copied ? <Check size={17} /> : <Share2 size={17} />}
+              <span className="hidden sm:inline">{copied ? "Enlace copiado" : "Compartir"}</span>
             </button>
 
             {subs.length > 1 && (
@@ -209,6 +233,15 @@ export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
             style={{ background: "var(--lv-wine)", color: "var(--lv-cream)" }}>
             <Sparkles size={16} /> Personalizar y pedir
           </button>
+          {cart.count > 0 && (
+            <button onClick={() => cart.setOpen(true)} aria-label={`Mi pedido, ${cart.count} productos`}
+              className="btn-press relative h-[54px] w-[54px] shrink-0 rounded-full flex items-center justify-center"
+              style={{ background: "var(--lv-cream-2)", color: "var(--lv-wine)" }}>
+              <ShoppingBag size={20} />
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full flex items-center justify-center font-inter text-[12px] font-semibold"
+                style={{ background: "var(--lv-gold)", color: "var(--lv-wine-deep)" }}>{cart.count}</span>
+            </button>
+          )}
           {canAR && (
             <button onClick={() => setArOpen(true)} aria-label="Ver tamaño real con la cámara"
               className="btn-press ar-cta h-[54px] px-5 rounded-full flex items-center gap-2 font-inter text-[14px] font-semibold"
