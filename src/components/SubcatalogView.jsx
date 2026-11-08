@@ -5,8 +5,8 @@ import OrderForm from "./OrderForm";
 import DessertCareModal from "./DessertCareModal";
 import CakeARModal from "./cake/CakeARModal";
 import useScrollLock from "@/hooks/useScrollLock";
-import { usePublicCatalog, productOptions } from "@/data/catalogStore";
-import { OPTION_KINDS } from "@/data/defaults";
+import { usePublicCatalog, productGroups } from "@/data/catalogStore";
+import { formatCOP } from "@/data/defaults";
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -19,14 +19,14 @@ export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
   const [orderFormOpen, setOrderFormOpen] = useState(false);
   const [careOpen, setCareOpen] = useState(false);
   const [arOpen, setArOpen] = useState(false);
-  const { options, portions } = usePublicCatalog();
+  const { options, portions, groups, receipt } = usePublicCatalog();
   const trackRef = useRef(null);
   const scrollerRef = useRef(null);
   useScrollLock(true);
 
   const subs = product.subcategories;
   const sub = subs[subIdx] || subs[0];
-  const subOptions = productOptions(sub, options);
+  const subGroups = productGroups(sub, options, groups);
   const subPortions = portions.filter((p) => sub?.portionIds?.includes(p.id));
   const canAR = sub?.ar && subPortions.length > 0;
 
@@ -135,16 +135,25 @@ export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
 
                 <p className="font-inter text-[17px] leading-relaxed mt-5" style={{ color: "var(--lv-ink)" }}>{sub.desc}</p>
 
-                {Object.keys(subOptions).length > 0 && (
+                {sub.leadDays > 0 && (
+                  <p className="font-inter text-[15px] mt-4 inline-flex rounded-full px-4 py-2" style={{ background: "var(--lv-rose-soft)", color: "var(--lv-wine)" }}>
+                    Pídela con {sub.leadDays} {sub.leadDays === 1 ? "día" : "días"} de anticipación
+                  </p>
+                )}
+
+                {subGroups.length > 0 && (
                   <div className="mt-8 space-y-5">
-                    {OPTION_KINDS.filter((k) => subOptions[k.kind]).map((k) => (
-                      <div key={k.kind}>
-                        <h2 className="font-display text-[21px] mb-2.5" style={{ color: "var(--lv-wine)" }}>{k.label}</h2>
+                    {subGroups.map(({ group, options: opts }) => (
+                      <div key={group.key}>
+                        <h2 className="font-display text-[21px] mb-2.5" style={{ color: "var(--lv-wine)" }}>{group.label}</h2>
                         <div className="flex flex-wrap gap-2">
-                          {subOptions[k.kind].map((o) => (
-                            <span key={o.id} className="px-3.5 py-2 rounded-full font-inter text-[14px]"
+                          {opts.map((o) => (
+                            <span key={o.id} title={o.description || undefined} className="px-3.5 py-2 rounded-full font-inter text-[14px]"
                               style={{ background: "var(--lv-cream-2)", color: "var(--lv-ink)" }}>
                               {o.name}
+                              {receipt.showPrices && o.priceExtra > 0 && (
+                                <span className="ml-1.5 text-[12.5px] font-semibold" style={{ color: "#8a6a1f" }}>+{formatCOP(o.priceExtra)}</span>
+                              )}
                             </span>
                           ))}
                         </div>
@@ -215,7 +224,7 @@ export default function SubcatalogView({ product, onBack, initialSubIdx = 0 }) {
       </AnimatePresence>
       {careOpen && <DessertCareModal product={product} onClose={() => setCareOpen(false)} />}
       {orderFormOpen && (
-        <OrderForm product={product} subcategory={sub} options={subOptions} portions={subPortions} onClose={() => setOrderFormOpen(false)} />
+        <OrderForm product={product} subcategory={sub} groups={subGroups} portions={subPortions} receipt={receipt} onClose={() => setOrderFormOpen(false)} />
       )}
     </>
   );

@@ -2,7 +2,8 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Instagram } from "lucide-react";
 import GoldDust from "./fx/GoldDust";
-import { instagramUrl, whatsappUrl, scrollToId, SITE } from "@/data/site";
+import { instagramUrl, whatsappUrl, scrollToId } from "@/data/site";
+import { usePublicCatalog } from "@/data/catalogStore";
 
 const LINKS = [
   { label: "Catálogo", href: "#catalogo" },
@@ -13,6 +14,7 @@ const LINKS = [
 ];
 
 export default function FooterSection() {
+  const { site } = usePublicCatalog();
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
   // El nombre sube y se abre al llegar al final de la página
@@ -39,10 +41,10 @@ export default function FooterSection() {
           ))}
         </nav>
         <div className="font-inter text-[16px] space-y-2.5" style={{ color: "rgba(253,250,245,0.85)" }}>
-          <p>{SITE.address}</p>
-          <p>{SITE.hours}</p>
+          <p>{site.address}</p>
+          <p>{site.hours}</p>
           <a href={instagramUrl()} target="_blank" rel="noopener noreferrer" className="nav-link inline-flex items-center gap-2">
-            <Instagram size={17} /> @{SITE.instagram}
+            <Instagram size={17} /> @{String(site.instagram).replace(/^@/, "")}
           </a>
         </div>
       </div>

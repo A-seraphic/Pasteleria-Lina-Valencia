@@ -2,9 +2,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase, isRemote, STORAGE_BUCKET } from "@/lib/supabase";
 import { CATALOG } from "./catalogData";
-import { DEFAULT_OPTIONS, DEFAULT_PORTIONS, CAKE_CATEGORY_NAMES } from "./defaults";
+import { DEFAULT_OPTIONS, DEFAULT_PORTIONS, DEFAULT_SETTINGS, CAKE_CATEGORY_NAMES, parsePrice } from "./defaults";
+import { setSite } from "./site";
 
-const LOCAL_KEY = "lv-catalogo-demo-v1";
+const LOCAL_KEY = "lv-catalogo-demo-v2";
 export const CATALOG_QUERY_KEY = ["catalogo"];
 
 // ── Estado inicial (catálogo actual de la página) ───────────────────────────────
@@ -41,10 +42,26 @@ export function getDefaultState() {
         options: isCake
           ? { bizcocho: optionIds("bizcocho"), relleno: optionIds("relleno"), cobertura: optionIds("cobertura"), extra: optionIds("extra") }
           : { bizcocho: [], relleno: [], cobertura: [], extra: [] },
+        basePrice: parsePrice(sub.price),
+        leadDays: isCake ? 3 : 1,
+        receiptNote: "",
+        // Preguntas propias que el cliente responde al pedir (se imprimen en el recibo)
+        customFields: cat.name === "Personalizadas" || cat.name === "Mini Tortas"
+          ? [{ label: "Nombre o mensaje en la torta", placeholder: "Ej: Feliz cumpleaños Valentina", required: false }]
+          : [],
       })),
     };
   });
-  return { categories, options: DEFAULT_OPTIONS, portions: DEFAULT_PORTIONS };
+  return { categories, options: DEFAULT_OPTIONS, portions: DEFAULT_PORTIONS, settings: DEFAULT_SETTINGS };
+}
+
+// Completa ajustes guardados con los valores por defecto (por si faltan claves nuevas)
+function mergeSettings(saved = {}) {
+  return {
+    site: { ...DEFAULT_SETTINGS.site, ...(saved.site || {}) },
+    receipt: { ...DEFAULT_SETTINGS.receipt, ...(saved.receipt || {}) },
+    optionGroups: Array.isArray(saved.optionGroups) && saved.optionGroups.length ? saved.optionGroups : DEFAULT_SETTINGS.optionGroups,
+  };
 }
 
 const bySort = (a, b) => (a.sort ?? 0) - (b.sort ?? 0) || (a.id ?? 0) - (b.id ?? 0);
@@ -57,6 +74,10 @@ function sortState(state) {
       .map((c) => ({ ...c, subcategories: [...(c.subcategories || [])].sort(bySort) })),
     options: [...state.options].sort(bySort),
     portions: [...state.portions].sort(bySort),
+    settings: (() => {
+      const st = mergeSettings(state.settings);
+      return { ...st, optionGroups: [...st.optionGroups].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0)) };
+    })(),
   };
 }
 
@@ -74,21 +95,32 @@ const prodFromRow = (r) => ({
   id: r.id, categoryId: r.category_id, name: r.name, subtitle: r.subtitle || "", desc: r.description || "",
   img: r.img || "", price: r.price || "", badge: r.badge || "", visible: r.visible, sort: r.sort, ar: r.ar,
   portionIds: r.portion_ids || [], options: r.options || {},
+  basePrice: Number(r.base_price) || 0, leadDays: r.lead_days ?? 0, receiptNote: r.receipt_note || "",
+  customFields: r.custom_fields || [],
 });
 const prodToRow = (p) => ({
   category_id: p.categoryId, name: p.name, subtitle: p.subtitle, description: p.desc, img: p.img, price: p.price,
   badge: p.badge || "", visible: p.visible ?? true, sort: p.sort ?? 0, ar: Boolean(p.ar),
   portion_ids: p.portionIds || [], options: p.options || {},
+  base_price: Number(p.basePrice) || 0, lead_days: Number(p.leadDays) || 0, receipt_note: p.receiptNote || "",
+  custom_fields: (p.customFields || []).filter((f) => f.label?.trim()),
 });
-const optFromRow = (r) => ({ id: r.id, kind: r.kind, name: r.name, visible: r.visible, sort: r.sort });
-const optToRow = (o) => ({ kind: o.kind, name: o.name, visible: o.visible ?? true, sort: o.sort ?? 0 });
+const optFromRow = (r) => ({
+  id: r.id, kind: r.kind, name: r.name, visible: r.visible, sort: r.sort,
+  priceExtra: Number(r.price_extra) || 0, description: r.description || "",
+});
+const optToRow = (o) => ({
+  kind: o.kind, name: o.name, visible: o.visible ?? true, sort: o.sort ?? 0,
+  price_extra: Number(o.priceExtra) || 0, description: o.description || "",
+});
 const porFromRow = (r) => ({
   id: r.id, label: r.label, people: r.people || "", diameter: Number(r.diameter_cm), height: Number(r.height_cm),
-  tiers: r.tiers, slices: r.slices, sort: r.sort,
+  tiers: r.tiers, slices: r.slices, sort: r.sort, priceExtra: Number(r.price_extra) || 0,
 });
 const porToRow = (p) => ({
   label: p.label, people: p.people, diameter_cm: Number(p.diameter), height_cm: Number(p.height),
   tiers: Number(p.tiers) || 1, slices: Number(p.slices) || 1, sort: p.sort ?? 0,
+  price_extra: Number(p.priceExtra) || 0,
 });
 
 // ── Lectura ────────────────────────────────────────────────────────────────────
@@ -111,19 +143,29 @@ function writeLocal(state) {
 }
 
 export async function fetchCatalog() {
+  const result = await loadCatalog();
+  setSite(result.settings.site); // WhatsApp, Instagram y dirección siempre al día
+  return result;
+}
+
+async function loadCatalog() {
   if (!isRemote) return { ...sortState(readLocal()), source: "local" };
 
-  const [cats, prods, opts, pors] = await Promise.all([
+  const [cats, prods, opts, pors, sets] = await Promise.all([
     supabase.from("categories").select("*"),
     supabase.from("products").select("*"),
     supabase.from("options").select("*"),
     supabase.from("portions").select("*"),
+    supabase.from("settings").select("*"),
   ]);
   const error = cats.error || prods.error || opts.error || pors.error;
   if (error) throw error;
+  // Si la migración de ajustes aún no se ejecutó, se usan los valores por defecto
+  const settings = Object.fromEntries((sets.error ? [] : sets.data).map((r) => [r.key, r.value]));
+  const schemaReady = !sets.error;
 
   // Base de datos todavía vacía: se muestra el catálogo actual hasta que lo importen
-  if (cats.data.length === 0) return { ...sortState(getDefaultState()), source: "defaults" };
+  if (cats.data.length === 0) return { ...sortState({ ...getDefaultState(), settings }), source: "defaults", schemaReady };
 
   const categories = cats.data.map(catFromRow);
   const byId = new Map(categories.map((c) => [c.id, c]));
@@ -133,8 +175,10 @@ export async function fetchCatalog() {
       categories,
       options: opts.data.map(optFromRow),
       portions: pors.data.map(porFromRow),
+      settings,
     }),
     source: "remote",
+    schemaReady,
   };
 }
 
@@ -148,9 +192,13 @@ export function usePublicCatalog() {
   const data = useMemo(() => {
     const state = query.data || sortState(getDefaultState());
     const options = state.options.filter((o) => o.visible);
+    const settings = state.settings || mergeSettings();
     return {
       options,
       portions: state.portions,
+      groups: settings.optionGroups.filter((g) => g.visible !== false),
+      site: settings.site,
+      receipt: settings.receipt,
       categories: state.categories
         .filter((c) => c.visible)
         .map((c) => ({ ...c, subcategories: c.subcategories.filter((s) => s.visible) }))
@@ -160,14 +208,21 @@ export function usePublicCatalog() {
   return { ...data, isLoading: query.isLoading };
 }
 
-// Opciones elegibles de un producto, agrupadas por tipo
-export function productOptions(product, options) {
-  const result = {};
-  for (const [kind, ids] of Object.entries(product?.options || {})) {
-    const list = options.filter((o) => o.kind === kind && o.visible && ids.includes(o.id));
-    if (list.length) result[kind] = list;
-  }
-  return result;
+// Especializaciones que aplican a un producto, en el orden de los grupos: [{ group, options }]
+export function productGroups(product, options, groups) {
+  return groups
+    .map((group) => {
+      const ids = product?.options?.[group.key] || [];
+      return { group, options: options.filter((o) => o.kind === group.key && o.visible && ids.includes(o.id)) };
+    })
+    .filter((g) => g.options.length > 0);
+}
+
+// Total estimado de un pedido: precio base + tamaño + extras de las opciones elegidas
+export function estimateTotal(product, portion, chosenOptions) {
+  const base = Number(product?.basePrice) || 0;
+  if (!base) return 0;
+  return base + (Number(portion?.priceExtra) || 0) + chosenOptions.reduce((t, o) => t + (Number(o.priceExtra) || 0), 0);
 }
 
 // ── Escritura (panel) ──────────────────────────────────────────────────────────
@@ -288,6 +343,30 @@ export const catalogApi = {
       const { error } = await supabase.from("products").insert(rows);
       if (error) throw error;
     }
+  },
+
+  // Ajustes: "site" (negocio), "receipt" (recibo) u "optionGroups" (especializaciones)
+  async saveSettings(key, value) {
+    if (isRemote) {
+      const { error } = await supabase.from("settings").upsert({ key, value, updated_at: new Date().toISOString() });
+      if (error) throw error;
+      return value;
+    }
+    return mutateLocal((s) => {
+      s.settings = { ...(s.settings || {}), [key]: value };
+      return value;
+    });
+  },
+
+  // Borra una especialización y todas sus opciones
+  async deleteGroup(groups, key) {
+    if (isRemote) {
+      const { error } = await supabase.from("options").delete().eq("kind", key);
+      if (error) throw error;
+    } else {
+      mutateLocal((s) => { s.options = s.options.filter((o) => o.kind !== key); });
+    }
+    return catalogApi.saveSettings("optionGroups", groups.filter((g) => g.key !== key));
   },
 
   resetLocal() {

@@ -1,15 +1,16 @@
 import SlideRevealWrapper from "./SlideRevealWrapper";
 import { MapPin, Phone, Clock, Instagram, ArrowUpRight } from "lucide-react";
-import { SITE, whatsappUrl, instagramUrl, mapsUrl } from "@/data/site";
-
-const ROWS = [
-  { icon: MapPin, label: "Visítanos", text: SITE.address, href: mapsUrl() },
-  { icon: Phone, label: "Llámanos", text: SITE.phoneLabel, href: `tel:+${SITE.whatsapp}` },
-  { icon: Instagram, label: "Instagram", text: `@${SITE.instagram}`, href: instagramUrl() },
-  { icon: Clock, label: "Horario", text: SITE.hours },
-];
+import { whatsappUrl, instagramUrl, mapsUrl } from "@/data/site";
+import { usePublicCatalog } from "@/data/catalogStore";
 
 export default function ContactSection() {
+  const { site } = usePublicCatalog();
+  const ROWS = [
+    { icon: MapPin, label: "Visítanos", text: site.address, href: mapsUrl() },
+    { icon: Phone, label: "Llámanos", text: site.phoneLabel, href: `tel:+${String(site.whatsapp).replace(/\D/g, "")}` },
+    { icon: Instagram, label: "Instagram", text: `@${String(site.instagram).replace(/^@/, "")}`, href: instagramUrl() },
+    { icon: Clock, label: "Horario", text: site.hours },
+  ].filter((r) => r.text);
   return (
     <section id="contacto" className="relative py-20 md:py-36 px-5 md:px-6">
       <div className="max-w-5xl mx-auto">

@@ -11,11 +11,14 @@ import ProductEditor from "@/components/panel/ProductEditor";
 import CategoryEditor from "@/components/panel/CategoryEditor";
 import OptionsEditor from "@/components/panel/OptionsEditor";
 import PortionsEditor from "@/components/panel/PortionsEditor";
+import { ReceiptSettings, SiteSettings } from "@/components/panel/SettingsEditor";
 
 const TABS = [
   { key: "catalogo", label: "Catálogo" },
-  { key: "opciones", label: "Sabores y rellenos" },
+  { key: "opciones", label: "Especializaciones" },
   { key: "porciones", label: "Tamaños" },
+  { key: "recibo", label: "Recibo" },
+  { key: "negocio", label: "Negocio" },
 ];
 
 // El panel no debe aparecer en buscadores
@@ -124,14 +127,33 @@ function Dashboard({ email }) {
 
       <main className="max-w-5xl mx-auto px-4 pt-5 space-y-4">
         <SourceBanner source={data?.source} />
+        {data?.source !== "local" && data?.schemaReady === false && (
+          <p className="rounded-2xl p-4 text-[14px]" style={{ background: "#fdecea", color: "#8c1d18" }}>
+            <b>Falta actualizar la base de datos.</b> En Supabase → SQL Editor, ejecuta el archivo
+            <code className="mx-1">supabase/migrations/002_panel_avanzado.sql</code>
+            para guardar especializaciones con precio, recibo y datos del negocio.
+          </p>
+        )}
         {isLoading && <div className="py-20 flex justify-center"><Loader2 className="animate-spin" style={{ color: C.gold }} /></div>}
         {error && <p className="rounded-2xl p-4 text-sm" style={{ background: "#fdecea", color: "#b3261e" }}>No se pudo cargar el catálogo: {error.message}</p>}
         {data && (
           <AnimatePresence mode="wait">
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
               {tab === "catalogo" && <CatalogTab data={data} />}
-              {tab === "opciones" && <OptionsEditor options={data.options} />}
+              {tab === "opciones" && <OptionsEditor options={data.options} groups={data.settings.optionGroups} />}
               {tab === "porciones" && <PortionsEditor portions={data.portions} />}
+              {tab === "recibo" && (
+                <ReceiptSettings
+                  key={JSON.stringify(data.settings.receipt)}
+                  receipt={data.settings.receipt}
+                  sample={(() => {
+                    const c = data.categories[0];
+                    const p = c?.subcategories[0];
+                    return p && { ...p, category: c.name };
+                  })()}
+                />
+              )}
+              {tab === "negocio" && <SiteSettings key={JSON.stringify(data.settings.site)} site={data.settings.site} />}
             </motion.div>
           </AnimatePresence>
         )}
@@ -256,7 +278,7 @@ function CatalogTab({ data }) {
 
       {editing?.type === "product" && (
         <ProductEditor product={editing.item} category={editing.category} categories={data.categories}
-          options={data.options} portions={data.portions} onClose={() => setEditing(null)} />
+          options={data.options} portions={data.portions} groups={data.settings.optionGroups} onClose={() => setEditing(null)} />
       )}
       {editing?.type === "category" && (
         <CategoryEditor category={editing.item} categories={data.categories} onClose={() => setEditing(null)} />

@@ -48,7 +48,7 @@ function MobileMenu({ onNav, onClose }) {
         </a>
         <a href={instagramUrl()} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 py-3 font-inter text-[15px]" style={{ color: "var(--lv-gold-soft)" }}>
-          <Instagram size={17} /> @{SITE.instagram}
+          <Instagram size={17} /> @{String(SITE.instagram).replace(/^@/, "")}
         </a>
       </motion.div>
     </motion.div>

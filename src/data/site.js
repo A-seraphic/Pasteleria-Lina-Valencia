@@ -1,16 +1,19 @@
-// Datos de contacto en un solo lugar (WhatsApp, redes, dirección)
-export const SITE = {
-  whatsapp: "573001234567",
-  phoneLabel: "+57 300 123 4567",
-  instagram: "linavalenciapasteleria",
-  address: "Calle 85 #12-30, Bogotá",
-  hours: "Lun - Sáb: 8:00 AM - 7:00 PM",
-};
+import { DEFAULT_SITE } from "./defaults";
 
-export const whatsappUrl = (text = "¡Hola Lina! Quiero hacer un pedido 🎂") =>
-  `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
+// Datos de contacto (WhatsApp, redes, dirección). Se editan en el panel → Ajustes;
+// el catálogo los sincroniza aquí al cargar (setSite).
+export const SITE = { ...DEFAULT_SITE };
 
-export const instagramUrl = () => `https://instagram.com/${SITE.instagram}`;
+export function setSite(values) {
+  Object.assign(SITE, values);
+}
+
+const digits = (n) => String(n || "").replace(/\D/g, "");
+
+export const whatsappUrl = (text = SITE.greeting) =>
+  `https://wa.me/${digits(SITE.whatsapp)}?text=${encodeURIComponent(text)}`;
+
+export const instagramUrl = () => `https://instagram.com/${String(SITE.instagram).replace(/^@/, "")}`;
 export const mapsUrl = () => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(SITE.address)}`;
 
 // Desplazamiento a una sección respetando el scroll suave

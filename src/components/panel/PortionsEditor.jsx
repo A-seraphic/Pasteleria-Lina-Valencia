@@ -20,6 +20,7 @@ function PortionCard({ portion, onDone }) {
         height: Number(form.height) || 8,
         tiers: Math.min(4, Math.max(1, parseInt(form.tiers) || 1)),
         slices: Math.max(1, parseInt(form.slices) || 1),
+        priceExtra: Number(form.priceExtra) || 0,
       };
       await run(() => catalogApi.savePortion(clean), portion.id ? "Tamaño actualizado" : "Tamaño creado");
       onDone?.();
@@ -45,6 +46,9 @@ function PortionCard({ portion, onDone }) {
         <Field label="Pisos"><TextInput {...num("tiers")} max={4} /></Field>
         <Field label="Porc."><TextInput {...num("slices")} /></Field>
       </div>
+      <Field label="Valor extra de este tamaño" hint="Se suma al precio base del producto en el total del recibo (0 = no cambia)">
+        <TextInput type="number" inputMode="numeric" min={0} step={1000} value={form.priceExtra ?? 0} onChange={(e) => set({ priceExtra: e.target.value })} />
+      </Field>
       <div className="flex gap-2">
         {portion.id && <GhostButton danger onClick={remove} aria-label="Eliminar"><Trash2 size={15} /></GhostButton>}
         <PrimaryButton className="flex-1" onClick={save} loading={saving} disabled={!dirty || !form.label}>
@@ -66,7 +70,7 @@ export default function PortionsEditor({ portions }) {
         {portions.map((p) => <PortionCard key={`${p.id}-${JSON.stringify(p)}`} portion={p} />)}
         {adding && (
           <PortionCard
-            portion={{ label: "", people: "", diameter: 20, height: 10, tiers: 1, slices: 10, sort: nextSort(portions) }}
+            portion={{ label: "", people: "", diameter: 20, height: 10, tiers: 1, slices: 10, priceExtra: 0, sort: nextSort(portions) }}
             onDone={() => setAdding(false)}
           />
         )}
