@@ -98,9 +98,15 @@ export default function HeroSection({ ready = true }) {
     const t = setTimeout(async () => {
       const r = logoRef.current?.getBoundingClientRect();
       if (!r) return;
-      const confetti = (await import("canvas-confetti")).default;
+      const { create } = (await import("canvas-confetti")).default;
+      // Lienzo propio y sin worker: la versión por defecto falla en algunos navegadores
+      const canvas = document.createElement("canvas");
+      Object.assign(canvas.style, { position: "fixed", inset: "0", width: "100%", height: "100%", pointerEvents: "none", zIndex: "50" });
+      document.body.appendChild(canvas);
+      const confetti = create(canvas, { resize: true, useWorker: false });
       const origin = { x: (r.left + r.width / 2) / window.innerWidth, y: (r.top + r.height * 0.3) / window.innerHeight };
       const mobile = window.innerWidth < 640;
+      setTimeout(() => { confetti.reset(); canvas.remove(); }, 4500);
       confetti({
         particleCount: mobile ? 45 : 80,
         spread: 75,
