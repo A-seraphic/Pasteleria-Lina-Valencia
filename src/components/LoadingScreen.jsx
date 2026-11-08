@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Drips from "./fx/Drips";
 import { BRAND_ICONS } from "./fx/BrandIcons";
 
 const EASE = [0.76, 0, 0.24, 1];
@@ -40,15 +39,10 @@ export default function LoadingScreen({ onComplete }) {
       {isVisible && (
         <motion.div
           className="fixed inset-0 z-[100]"
-          exit={{ y: "-118%" }}
+          exit={{ y: "-100%" }}
           transition={{ duration: 1.05, ease: EASE }}
         >
           <div className="relative h-full flex flex-col items-center justify-center overflow-hidden" style={{ background: "var(--lv-rose-soft)" }}>
-            {/* Glaseado que se vierte desde arriba mientras carga */}
-            <div className="absolute top-0 inset-x-0">
-              <div className="h-[5svh]" style={{ background: "var(--lv-rose)" }} />
-              <Drips color="var(--lv-rose)" shade="#ec8fb5" seed={5} height={full ? 230 : 150} delay={0.1} falling={full} />
-            </div>
             {/* Íconos de la marca orbitando */}
             {full && (
               <motion.div className="absolute w-[min(78vw,420px)] aspect-square" aria-hidden
@@ -85,8 +79,6 @@ export default function LoadingScreen({ onComplete }) {
             </div>
           </div>
 
-          {/* Gotas de glaseado que cuelgan del borde y "caen" al subir la cortina */}
-          <Drips color="var(--lv-rose-soft)" shade="#f4b3cc" seed={11} height={170} delay={0.6} falling={false} className="absolute left-0 right-0 top-full -mt-[2px]" />
         </motion.div>
       )}
     </AnimatePresence>
