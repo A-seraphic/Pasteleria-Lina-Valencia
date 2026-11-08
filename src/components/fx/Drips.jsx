@@ -65,19 +65,13 @@ export default function Drips({ color, shade, height = 130, seed = 7, play = tru
               <stop offset="55%" style={{ stopColor: color }} />
               <stop offset="100%" style={{ stopColor: dark }} />
             </linearGradient>
-            {/* Brillo especular + sombra: da el aspecto húmedo y en relieve */}
+            {/* Solo una sombra suave para separar el glaseado del fondo (sin brillo) */}
             <filter id={`f-${uid}`} x="-10%" y="-20%" width="120%" height="160%" colorInterpolationFilters="sRGB">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="3.2" result="blur" />
-              <feSpecularLighting in="blur" surfaceScale="4.5" specularConstant="1.05" specularExponent="36" lightingColor="#ffffff" result="spec">
-                <fePointLight x={width * 0.25} y="-240" z="95" />
-              </feSpecularLighting>
-              <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn" />
-              <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.75" k4="0" result="lit" />
-              <feDropShadow in="lit" dx="0" dy="5" stdDeviation="4.5" floodColor="#a50059" floodOpacity="0.18" />
+              <feDropShadow in="SourceGraphic" dx="0" dy="4" stdDeviation="4" floodColor="#a50059" floodOpacity="0.14" />
             </filter>
           </defs>
 
-          {/* Gotas con brillo: empiezan por encima del borde para que la unión no muestre costuras */}
+          {/* Gotas: empiezan por encima del borde para que la unión no muestre costuras */}
           <g filter={`url(#f-${uid})`} style={{ fill: `url(#g-${uid})` }}>
             {drips.map((d, i) => (
               <motion.path
@@ -93,13 +87,6 @@ export default function Drips({ color, shade, height = 130, seed = 7, play = tru
           {/* Banda superior plana, del mismo color del bloque de arriba, con borde ondulado */}
           <path style={{ fill: color }}
             d={`M0 -2 H${width} V${base} ` + Array.from({ length: Math.ceil(width / 60) + 1 }, (_, i) => `Q${width - i * 60 - 30} ${base + 7} ${width - (i + 1) * 60} ${base}`).join(" ") + " V-2 Z"} />
-
-          {/* Reflejos en los bulbos: punto de luz que vende el volumen */}
-          {drips.map((d, i) => (
-            <motion.ellipse key={`h-${i}`} cx={d.c - d.w * 0.12} cy={base + d.len - d.w * 0.5} rx={d.w * 0.09} ry={d.w * 0.14}
-              fill="#ffffff" initial={{ opacity: 0 }} animate={{ opacity: play ? 0.75 : 0 }}
-              transition={{ delay: delay + 1.2 + (i % 6) * 0.09, duration: 0.6 }} />
-          ))}
 
           {/* Gotitas que se desprenden y caen */}
           {falling && play && drips.filter((d) => d.falls).map((d, i) => (
