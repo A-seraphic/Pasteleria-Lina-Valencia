@@ -133,12 +133,7 @@ export default function AboutSection() {
               transition={{ duration: 0.65, ease: EASE, delay: 0.95 }}
             >
               <div>
-                <p
-                  className="font-playfair text-xl italic"
-                  style={{ color: "#a50059" }}
-                >
-                  Lina Valencia
-                </p>
+                <p className="brand-gold text-[36px] leading-none">Lina Valencia</p>
                 <p
                   className="font-inter text-[10px] tracking-[0.25em] uppercase mt-0.5"
                   style={{ color: "rgba(212,175,55,0.7)" }}

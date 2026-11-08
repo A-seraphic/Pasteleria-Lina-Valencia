@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Great+Vibes&family=Montserrat:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Great+Vibes&family=Pinyon+Script&family=Montserrat:wght@500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -209,14 +209,25 @@ body { background: var(--lv-cream); }
 .lace-track { animation-duration: 48s; }
 .lace-band:hover .lace-track { animation-play-state: paused; }
 
-/* Gotita de glaseado que se estira, se suelta y cae */
-.glaze-drop { opacity: 0; animation-name: glaze-drop; animation-iteration-count: infinite; animation-timing-function: cubic-bezier(.5,0,.75,0); will-change: transform, opacity; }
-@keyframes glaze-drop {
-  0% { opacity: 0; transform: translateY(0) scale(0.3); }
-  12% { opacity: 1; transform: translateY(0) scale(1); }
-  30% { opacity: 1; transform: translateY(4px) scale(0.88, 1.3); }
-  72% { opacity: 1; transform: translateY(44px) scale(0.95, 1.12); }
-  86% { opacity: 0; transform: translateY(56px) scale(0.9, 1); }
-  100% { opacity: 0; transform: translateY(56px); }
+
+
+/* "Lina Valencia" en caligrafía fina con dorado metálico y un brillo que lo recorre */
+.brand-gold {
+  font-family: "Pinyon Script", cursive;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.15;
+  background: linear-gradient(115deg, #8a6a1f 0%, #c9a227 18%, #fff1b8 34%, #d4af37 48%, #9c7419 64%, #f3dc9a 80%, #b8912a 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(110, 70, 0, 0.28));
+  animation: brand-shine 7s ease-in-out infinite;
+  padding: 0.08em 0.12em; /* que los trazos de la caligrafía no se corten */
 }
-@media (prefers-reduced-motion: reduce) { .glaze-drop { display: none; } }
+@keyframes brand-shine {
+  0%, 100% { background-position: 100% 0; }
+  50% { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) { .brand-gold { animation: none; } }

@@ -49,7 +49,7 @@ export default function HowToOrder() {
           </div>
           <div className="relative -mt-4 mx-[7%] overflow-hidden pt-4 pb-6">
             <motion.div style={{ y: ticketY, rotate: ticketRot }} className="receipt-paper relative px-6 pt-7 pb-9 origin-top">
-              <p className="font-display text-[28px] font-semibold text-center leading-none" style={{ color: "var(--lv-wine)" }}>Lina Valencia</p>
+              <p className="brand-gold text-[40px] text-center leading-none">Lina Valencia</p>
               <p className="font-inter text-[13px] text-center mt-1.5" style={{ color: "#8a6a1f" }}>Recibo de pedido · #LV-{year}-0427</p>
               <div className="my-5 h-[2px]" style={{ backgroundImage: "radial-gradient(circle, rgba(165,0,89,0.35) 1px, transparent 1.5px)", backgroundSize: "8px 2px" }} />
               <ul className="space-y-3.5">

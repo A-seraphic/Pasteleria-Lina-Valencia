@@ -80,7 +80,7 @@ function Login() {
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
         <div className="text-center mb-2">
           <p className="text-[10px] tracking-[0.35em] uppercase font-semibold" style={{ color: C.gold }}>Acceso privado</p>
-          <h1 className="font-playfair text-3xl font-semibold mt-1" style={{ color: C.wine }}>Lina Valencia</h1>
+          <h1 className="brand-gold text-[44px] leading-none mt-1">Lina Valencia</h1>
         </div>
         <TextInput type="email" autoComplete="username" required placeholder="Correo" value={email} onChange={(e) => setEmail(e.target.value)} />
         <TextInput type="password" autoComplete="current-password" required placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -102,7 +102,7 @@ function Dashboard({ email }) {
         <div className="max-w-5xl mx-auto px-4 pt-[max(env(safe-area-inset-top),12px)] pb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] tracking-[0.3em] uppercase font-semibold" style={{ color: C.gold }}>Panel privado</p>
-            <h1 className="font-playfair text-xl font-semibold truncate" style={{ color: C.wine }}>Lina Valencia</h1>
+            <h1 className="brand-gold text-[32px] leading-none truncate">Lina Valencia</h1>
           </div>
           <div className="flex items-center gap-2">
             <Link to="/" target="_blank" className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(212,175,55,0.14)", color: C.wine }} aria-label="Ver página">

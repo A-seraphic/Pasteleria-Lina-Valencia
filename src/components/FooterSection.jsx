@@ -20,7 +20,6 @@ export default function FooterSection() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
   // El nombre sube y se abre al llegar al final de la página
   const y = useTransform(scrollYProgress, [0, 1], ["40%", "0%"]);
-  const spacing = useTransform(scrollYProgress, [0, 1], ["-0.08em", "-0.03em"]);
 
   return (
     <footer ref={ref} className="relative overflow-hidden pt-16 md:pt-24" style={{ background: "var(--lv-wine-deep)", color: "var(--lv-cream)" }}>
@@ -50,10 +49,10 @@ export default function FooterSection() {
         </div>
       </div>
 
-      <motion.p aria-hidden style={{ y, letterSpacing: spacing }}
-        className="relative font-display font-semibold whitespace-nowrap text-center leading-[0.8] mt-14 md:mt-20 text-[15.5vw] select-none"
-        >
-        <span style={{ color: "var(--lv-cream)" }}>Lina </span><span style={{ color: "var(--lv-gold)" }}>Valencia</span>
+      <motion.p aria-hidden style={{ y }}
+        className="relative whitespace-nowrap text-center leading-[1] mt-10 md:mt-14 text-[17vw] select-none"
+      >
+        <span className="brand-gold inline-block">Lina Valencia</span>
       </motion.p>
       <p className="relative text-center font-inter text-[13px] pb-[max(env(safe-area-inset-bottom),20px)] pt-4" style={{ color: "rgba(253,250,245,0.5)" }}>
         © {new Date().getFullYear()} Lina Valencia Pastelería
