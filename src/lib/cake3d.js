@@ -47,11 +47,23 @@ export function buildCakeScene({ diameter = 20, height = 10, tiers = 1, slices =
     accent: mat(palette.accent, { roughness: 0.4 }),
     board: mat("#ffffff", { roughness: 0.35 }),
   };
+  // Caras de corte más oscuras: así se distingue dónde va cada porción
+  const shadeOf = (material, k) => {
+    const c = material.clone();
+    c.color = material.color.clone().multiplyScalar(k);
+    c.side = THREE.FrontSide;
+    return c;
+  };
+  const cut = {
+    sponge: [m.sponge, shadeOf(m.sponge, 0.6)],
+    filling: [m.filling, shadeOf(m.filling, 0.6)],
+    frosting: [m.frosting, shadeOf(m.frosting, 0.55)],
+  };
 
   const root = new THREE.Group();
   const layout = tierLayout({ diameter, height, tiers });
   const counts = slicesPerTier(layout, slices);
-  const gap = cm(0.12);
+  const gap = cm(0.55); // separación entre porciones: deja ver el corte
 
   // Base de presentación
   const boardR = cm(layout[0].d / 2 + 3);
@@ -78,10 +90,10 @@ export function buildCakeScene({ diameter = 20, height = 10, tiers = 1, slices =
       const sponge = h * 0.4;
       const fill = h * 0.1;
       const top = h - sponge * 2 - fill;
-      slice.add(wedge(r, a0, a1, sponge, 0, m.sponge));
-      slice.add(wedge(r, a0, a1, fill, sponge, m.filling));
-      slice.add(wedge(r, a0, a1, sponge, sponge + fill, m.sponge));
-      slice.add(wedge(r + cm(0.15), a0, a1, top, h - top, m.frosting));
+      slice.add(wedge(r, a0, a1, sponge, 0, cut.sponge));
+      slice.add(wedge(r, a0, a1, fill, sponge, cut.filling));
+      slice.add(wedge(r, a0, a1, sponge, sponge + fill, cut.sponge));
+      slice.add(wedge(r + cm(0.15), a0, a1, top, h - top, cut.frosting));
       // Cobertura exterior de la cuña
       const shell = new THREE.Mesh(
         new THREE.CylinderGeometry(r + cm(0.15), r + cm(0.15), h, Math.max(3, Math.ceil(72 / n)), 1, true, a0 + Math.PI / 2, a1 - a0),
@@ -142,27 +154,4 @@ export async function buildCakeModelUrl(params) {
   })();
   cache.set(key, promise);
   return promise;
-}
-
-// Taza de café de referencia (8 cm × 9,5 cm) para comparar el tamaño real
-export function buildReferenceCup() {
-  const g = new THREE.Group();
-  const white = mat("#ffffff", { roughness: 0.25 });
-  const coffee = mat("#3b2416", { roughness: 0.2 });
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(cm(4), cm(3.6), cm(9.5), 40, 1, true), white);
-  body.material = white.clone();
-  body.material.side = THREE.DoubleSide;
-  body.position.y = cm(4.75);
-  const base = new THREE.Mesh(new THREE.CircleGeometry(cm(3.6), 40), white);
-  base.rotation.x = -Math.PI / 2;
-  base.position.y = cm(0.1);
-  const drink = new THREE.Mesh(new THREE.CircleGeometry(cm(3.85), 40), coffee);
-  drink.rotation.x = -Math.PI / 2;
-  drink.position.y = cm(8.4);
-  const handle = new THREE.Mesh(new THREE.TorusGeometry(cm(2.2), cm(0.55), 12, 24, Math.PI * 1.2), white);
-  handle.position.set(cm(4.1), cm(5), 0);
-  handle.rotation.z = -Math.PI * 0.6;
-  g.add(body, base, drink, handle);
-  g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-  return g;
 }

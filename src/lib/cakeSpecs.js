@@ -1,3 +1,4 @@
+import { DEFAULT_PORTIONS } from "@/data/defaults";
 // Datos livianos de la torta 3D (sin three.js) para usarlos en la carga inicial
 
 // Paletas de cobertura que el cliente puede probar en 3D
@@ -24,4 +25,18 @@ export function tierLayout({ diameter, height, tiers = 1 }) {
 // Peso aproximado en kg (densidad media de torta ~0.55 g/cm³)
 export function estimateWeightKg(portion) {
   return tierLayout(portion).reduce((kg, t) => kg + (Math.PI * (t.d / 2) ** 2 * t.h * 0.55) / 1000, 0);
+}
+
+// Nombre del archivo 3D pregenerado para un tamaño y color (public/models/<clave>.glb)
+export const modelKey = ({ diameter, height, tiers = 1, slices, frosting = "rosa" }) =>
+  `torta-${Number(diameter)}cm-${Number(height)}alto-${Number(tiers) || 1}p-${Number(slices)}porc-${frosting}`;
+
+// Modelos pregenerados en public/models (tamaños por defecto × coberturas).
+// Con un archivo real, Android puede abrir el visor AR de Google (Scene Viewer).
+const STATIC_MODELS = new Set(
+  DEFAULT_PORTIONS.flatMap((p) => Object.keys(FROSTINGS).map((frosting) => modelKey({ ...p, frosting })))
+);
+export function staticModelUrl(params) {
+  const key = modelKey(params);
+  return STATIC_MODELS.has(key) ? `/models/${key}.glb` : null;
 }

@@ -124,7 +124,6 @@ export default function PortionGuide() {
 
   const [idx, setIdx] = useState(() => Math.min(3, Math.max(0, portions.length - 1)));
   const [cutKey, setCutKey] = useState("estandar");
-  const [showCup, setShowCup] = useState(true);
   const [arOpen, setArOpen] = useState(false);
   const onChange = useCallback((i) => setIdx(i), []);
 
@@ -144,7 +143,7 @@ export default function PortionGuide() {
             className="font-display font-semibold text-[46px] md:text-[88px] leading-[0.96]" />
           <Reveal>
             <RevealItem as="p" className="font-inter text-[16px] md:text-[18px] leading-relaxed max-w-[38ch]" style={{ color: "rgba(253,250,245,0.82)" }}>
-              Desliza la regla y mira la torta crecer en su tamaño real, con una taza de café al lado para comparar.
+              Desliza la regla y mira la torta porcionada en su tamaño real. Con la cámara la ves sobre tu mesa, en centímetros reales.
             </RevealItem>
           </Reveal>
         </div>
@@ -157,7 +156,7 @@ export default function PortionGuide() {
                 style={{ background: "radial-gradient(closest-side, rgba(243,220,154,0.22), transparent)" }} />
               {near && (
                 <Suspense fallback={null}>
-                  <CakeStage portion={active} slices={slices} showCup={showCup} />
+                  <CakeStage portion={active} slices={slices} />
                 </Suspense>
               )}
 
@@ -224,11 +223,6 @@ export default function PortionGuide() {
                 className="btn-press ar-cta flex-1 flex items-center justify-center gap-2 py-4 rounded-full font-inter text-[15px] font-semibold"
                 style={{ background: "var(--lv-gold)", color: "var(--lv-wine-deep)" }}>
                 <Camera size={18} /> Verla en mi mesa
-              </button>
-              <button onClick={() => setShowCup((v) => !v)} aria-pressed={showCup}
-                className="btn-press py-4 px-5 rounded-full font-inter text-[14px] font-medium"
-                style={{ background: "rgba(253,250,245,0.08)", color: "var(--lv-cream)" }}>
-                {showCup ? "Ocultar taza" : "Mostrar taza de referencia"}
               </button>
             </div>
             <p className="font-inter text-[13px]" style={{ color: "rgba(253,250,245,0.5)" }}>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { buildCakeScene, buildReferenceCup } from "@/lib/cake3d";
+import { buildCakeScene } from "@/lib/cake3d";
 import { tierLayout } from "@/lib/cakeSpecs";
 
 const easeOutBack = (t) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
@@ -10,9 +10,9 @@ const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 /**
  * Escenario 3D de la guía de porciones (three.js directo, sin recargas):
  * la torta crece o se encoge al cambiar de tamaño, la porción se desliza afuera,
- * se gira arrastrando con el dedo (con inercia) y una taza da la escala real.
+ * y se gira arrastrando con el dedo (con inercia).
  */
-export default function CakeStage({ portion, slices, frosting = "rosa", showCup = true }) {
+export default function CakeStage({ portion, slices, frosting = "rosa" }) {
   const mountRef = useRef(null);
   const api = useRef(null);
 
@@ -59,7 +59,7 @@ export default function CakeStage({ portion, slices, frosting = "rosa", showCup 
     scene.add(turntable);
 
     const state = {
-      cake: null, cup: null, anims: [],
+      cake: null, anims: [],
       dist: 0.9, distTo: 0.9, targetYTo: 0.07,
       rotY: -0.5, vel: 0.0025, dragging: false, lastX: 0, idleAt: 0,
       visible: true, raf: 0,
@@ -177,28 +177,13 @@ export default function CakeStage({ portion, slices, frosting = "rosa", showCup 
     }
     state.cake = next;
 
-    // Encuadre según el tamaño: la taza mantiene la referencia real
+    // Encuadre según el tamaño de la torta
     const layout = tierLayout(params);
     const top = layout.reduce((h, t) => h + t.h, 0);
     state.distTo = 0.52 + (params.diameter / 30) * 0.42 + Math.max(0, top - 12) / 60;
     state.targetYTo = Math.max(0.07, (top / 100 + 0.01) * 0.5);
   }, [portion?.id, portion?.diameter, portion?.height, portion?.tiers, slices, frosting]);
 
-  // Taza de referencia fija al frente, a la izquierda de la base (no gira con la torta)
-  useEffect(() => {
-    const a = api.current;
-    if (!a) return;
-    const { scene, state } = a;
-    if (state.cup) scene.remove(state.cup);
-    state.cup = null;
-    if (!showCup || !portion) return;
-    const cup = buildReferenceCup();
-    const r = Number(portion.diameter) / 200 + 0.03;
-    cup.position.set(-(r * 0.72 + 0.05), 0, r * 0.72 + 0.04);
-    cup.rotation.y = 0.6;
-    scene.add(cup);
-    state.cup = cup;
-  }, [showCup, portion?.diameter]);
 
   return <div ref={mountRef} className="absolute inset-0" aria-label="Torta 3D que puedes girar arrastrando" role="img" />;
 }

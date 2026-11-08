@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { staticModelUrl } from "@/lib/cakeSpecs";
 // three.js y el exportador se cargan solo cuando aparece la primera torta
 const buildCakeModelUrl = (params) => import("@/lib/cake3d").then((m) => m.buildCakeModelUrl(params));
 
@@ -27,14 +28,19 @@ const CakeViewer = forwardRef(function CakeViewer(
   useEffect(() => {
     if (!portion) return;
     let alive = true;
-    buildCakeModelUrl({
+    const params = {
       diameter: Number(portion.diameter),
       height: Number(portion.height),
       tiers: Number(portion.tiers) || 1,
       slices: Number(slices ?? portion.slices) || 1,
       frosting,
       pulled,
-    }).then((url) => alive && setSrc(url));
+    };
+    // Si hay un archivo pregenerado se usa (dirección real: sirve para el AR de Android);
+    // si el tamaño fue editado en el panel, se genera en el momento.
+    const file = pulled && staticModelUrl(params);
+    if (file) setSrc(new URL(file, window.location.origin).href);
+    else buildCakeModelUrl(params).then((url) => alive && setSrc(url));
     return () => { alive = false; };
   }, [portion?.diameter, portion?.height, portion?.tiers, portion?.slices, slices, frosting, pulled]);
 
@@ -62,7 +68,7 @@ const CakeViewer = forwardRef(function CakeViewer(
           src={src}
           alt="Torta 3D a escala real"
           ar=""
-          ar-modes="webxr quick-look"
+          ar-modes={src?.startsWith("blob:") ? "webxr quick-look" : "webxr scene-viewer quick-look"}
           ar-scale="fixed"
           ar-placement="floor"
           {...(interactive ? { "camera-controls": "" } : {})}
