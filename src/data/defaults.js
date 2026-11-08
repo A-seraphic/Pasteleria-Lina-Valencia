@@ -72,7 +72,17 @@ export const DEFAULT_RECEIPT = {
   whatsappIntro: "¡Hola Lina! Te comparto el recibo de mi pedido que acabo de generar en la web.",
 };
 
-export const DEFAULT_SETTINGS = { site: DEFAULT_SITE, receipt: DEFAULT_RECEIPT, optionGroups: DEFAULT_OPTION_GROUPS };
+// Preguntas frecuentes (se editan en el panel → Preguntas)
+export const DEFAULT_FAQ = [
+  { q: "¿Con cuánta anticipación debo pedir?", a: "Las tortas artesanales se piden con al menos 3 días de anticipación y las personalizadas con 7 días. Para fechas especiales, escríbenos antes para separar tu fecha." },
+  { q: "¿Cómo confirmo mi pedido?", a: "Arma tu pedido en la página, genera el recibo y envíalo por WhatsApp. Lina te confirma la disponibilidad y el abono para separar la fecha." },
+  { q: "¿Hacen domicilios?", a: "Sí. Coordinamos la entrega por WhatsApp y el valor depende de la zona. También puedes recoger tu pedido con cita previa." },
+  { q: "¿Puedo pedir un diseño propio?", a: "Claro. Cuéntanos tu idea en las notas del pedido o envíanos una foto de referencia por WhatsApp y te ayudamos a hacerla realidad." },
+  { q: "¿Tienen opciones para alergias o sin gluten?", a: "Escribe tus alergias o restricciones en las notas del pedido y te diremos qué opciones podemos preparar para ti." },
+  { q: "¿Cómo conservo mi torta?", a: "Guárdala refrigerada y sácala 20 a 30 minutos antes de servir para que recupere su textura y sabor." },
+];
+
+export const DEFAULT_SETTINGS = { site: DEFAULT_SITE, receipt: DEFAULT_RECEIPT, optionGroups: DEFAULT_OPTION_GROUPS, faq: DEFAULT_FAQ };
 
 // Categorías cuyo producto es una torta y se puede ver en 3D / realidad aumentada
 export const CAKE_CATEGORY_NAMES = ["Tortas Artesanales", "Personalizadas", "Ponqués", "Mini Tortas", "Combos"];

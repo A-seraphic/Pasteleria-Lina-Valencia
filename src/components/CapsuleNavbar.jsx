@@ -88,8 +88,11 @@ export default function CapsuleNavbar() {
         animate={{ y: hidden && !open ? -90 : 0 }}
         transition={{ duration: 0.4, ease: EASE }}
         style={{
-          background: solid ? "rgba(253,250,245,0.94)" : "transparent",
-          transition: "background .35s ease",
+          background: solid ? "rgba(253,250,245,0.97)" : "transparent",
+          backdropFilter: solid ? "blur(12px)" : "none",
+          WebkitBackdropFilter: solid ? "blur(12px)" : "none",
+          boxShadow: solid ? "0 6px 24px rgba(92,0,50,0.06)" : "none",
+          transition: "background .35s ease, box-shadow .35s ease",
         }}
       >
         <div className="max-w-[1400px] mx-auto h-16 md:h-[76px] px-5 md:px-10 flex items-center justify-between gap-6">

@@ -10,6 +10,7 @@ const LINKS = [
   { label: "Personalizadas", href: "#personalizadas" },
   { label: "Porciones", href: "#porciones" },
   { label: "Cómo pedir", href: "#como-pedir" },
+  { label: "Preguntas", href: "#preguntas" },
   { label: "Contacto", href: "#contacto" },
 ];
 

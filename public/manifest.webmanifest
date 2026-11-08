@@ -1,0 +1,15 @@
+{
+  "name": "Lina Valencia Pastelería",
+  "short_name": "Lina Valencia",
+  "description": "Tortas y postres de autor hechos a pedido",
+  "lang": "es",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fde4ee",
+  "theme_color": "#fde4ee",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

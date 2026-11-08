@@ -61,6 +61,7 @@ function mergeSettings(saved = {}) {
     site: { ...DEFAULT_SETTINGS.site, ...(saved.site || {}) },
     receipt: { ...DEFAULT_SETTINGS.receipt, ...(saved.receipt || {}) },
     optionGroups: Array.isArray(saved.optionGroups) && saved.optionGroups.length ? saved.optionGroups : DEFAULT_SETTINGS.optionGroups,
+    faq: Array.isArray(saved.faq) ? saved.faq : DEFAULT_SETTINGS.faq,
   };
 }
 
@@ -199,6 +200,7 @@ export function usePublicCatalog() {
       groups: settings.optionGroups.filter((g) => g.visible !== false),
       site: settings.site,
       receipt: settings.receipt,
+      faq: settings.faq.filter((f) => f.q?.trim() && f.a?.trim()),
       categories: state.categories
         .filter((c) => c.visible)
         .map((c) => ({ ...c, subcategories: c.subcategories.filter((s) => s.visible) }))

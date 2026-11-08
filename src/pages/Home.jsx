@@ -10,6 +10,8 @@ import HowToOrder from "../components/HowToOrder";
 import VideoRevealSection from "../components/VideoRevealSection";
 import AboutSection from "../components/AboutSection";
 import ContactSection from "../components/ContactSection";
+import FaqSection from "../components/FaqSection";
+import SeoData from "../components/SeoData";
 import FooterSection from "../components/FooterSection";
 import Marquee from "../components/Marquee";
 import { ScrollProgress, WhatsAppFab } from "../components/ScrollExtras";
@@ -28,6 +30,7 @@ export default function Home() {
   return (
     <div className="relative min-h-screen overflow-x-clip font-inter">
       <LoadingScreen onComplete={handleLoadComplete} />
+      <SeoData />
 
       <div style={{ visibility: isLoading ? "hidden" : "visible" }}>
         <ScrollProgress />
@@ -45,6 +48,7 @@ export default function Home() {
           <VideoRevealSection />
           <AboutSection />
           <EssenceSection />
+          <FaqSection />
           <ContactSection />
         </main>
         <FooterSection />

@@ -12,12 +12,14 @@ import CategoryEditor from "@/components/panel/CategoryEditor";
 import OptionsEditor from "@/components/panel/OptionsEditor";
 import PortionsEditor from "@/components/panel/PortionsEditor";
 import { ReceiptSettings, SiteSettings } from "@/components/panel/SettingsEditor";
+import FaqEditor from "@/components/panel/FaqEditor";
 
 const TABS = [
   { key: "catalogo", label: "Catálogo" },
   { key: "opciones", label: "Especializaciones" },
   { key: "porciones", label: "Tamaños" },
   { key: "recibo", label: "Recibo" },
+  { key: "preguntas", label: "Preguntas" },
   { key: "negocio", label: "Negocio" },
 ];
 
@@ -153,6 +155,7 @@ function Dashboard({ email }) {
                   })()}
                 />
               )}
+              {tab === "preguntas" && <FaqEditor key={JSON.stringify(data.settings.faq)} faq={data.settings.faq} />}
               {tab === "negocio" && <SiteSettings key={JSON.stringify(data.settings.site)} site={data.settings.site} />}
             </motion.div>
           </AnimatePresence>
